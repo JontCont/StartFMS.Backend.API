@@ -5,7 +5,6 @@ using Microsoft.OpenApi.Models;
 using OpenAI.GPT3.Extensions;
 using StartFMS.Models.Backend;
 using StartFMS.Backend.Extensions;
-using StartFMS.Backend.Line.WebAPI.Extensions.LineBots;
 using System.Text;
 
 
@@ -92,13 +91,6 @@ var backend = new A00_BackendContext() {
     ConnectionString = config.GetValue<string>("ConnectionStrings:Default")
 };
 builder.Services.AddSingleton<A00_BackendContext>(backend);
-
-var lineBots = new LineBots() {
-    ChannelToken = config.GetValue<string>("Line:Bots:channelToken"),
-    AdminUserID = config.GetValue<string>("Line:Bots:adminUserID")
-};
-builder.Services.AddSingleton<LineBots>(lineBots);
-
 
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Start Five Minutes Backend API", Version = "v1" });
