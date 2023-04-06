@@ -1,14 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace StartFMS.Models.Backend {
-    public partial class A00_BackendContext : DbContext {
-        public string ConnectionString { get; set; }
-
-        public A00_BackendContext() {
+namespace StartFMS.Models.Backend
+{
+    public partial class A00_BackendContext : DbContext
+    {
+        public A00_BackendContext()
+        {
         }
 
         public A00_BackendContext(DbContextOptions<A00_BackendContext> options)
-            : base(options) {
+            : base(options)
+        {
         }
 
         public virtual DbSet<A00AccountUser> A00AccountUsers { get; set; } = null!;
@@ -20,15 +25,17 @@ namespace StartFMS.Models.Backend {
         public virtual DbSet<A01AccountRoleClaim> A01AccountRoleClaims { get; set; } = null!;
         public virtual DbSet<B10LineMessageOption> B10LineMessageOptions { get; set; } = null!;
         public virtual DbSet<B10LineMessageType> B10LineMessageTypes { get; set; } = null!;
+        public virtual DbSet<S01MenuBasicSetting> S01MenuBasicSettings { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            if (!optionsBuilder.IsConfigured) {
-                optionsBuilder.UseSqlServer(ConnectionString);
-            }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.Entity<A00AccountUser>(entity => {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<A00AccountUser>(entity =>
+            {
                 entity.ToTable("A00_AccountUsers");
 
                 entity.Property(e => e.Email).HasMaxLength(256);
@@ -50,8 +57,8 @@ namespace StartFMS.Models.Backend {
                 entity.Property(e => e.UserName).HasMaxLength(256);
             });
 
-            modelBuilder.Entity<A00AccountUserClaim>(entity => {
-
+            modelBuilder.Entity<A00AccountUserClaim>(entity =>
+            {
                 entity.ToTable("A00_AccountUserClaims");
 
                 entity.Property(e => e.UserId).HasMaxLength(450);
@@ -61,8 +68,8 @@ namespace StartFMS.Models.Backend {
                     .HasForeignKey(d => d.UserId);
             });
 
-            modelBuilder.Entity<A00AccountUserLogin>(entity => {
-
+            modelBuilder.Entity<A00AccountUserLogin>(entity =>
+            {
                 entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
 
                 entity.ToTable("A00_AccountUserLogins");
@@ -78,8 +85,8 @@ namespace StartFMS.Models.Backend {
                     .HasForeignKey(d => d.UserId);
             });
 
-            modelBuilder.Entity<A00AccountUserRole>(entity => {
-
+            modelBuilder.Entity<A00AccountUserRole>(entity =>
+            {
                 entity.HasKey(e => new { e.UserId, e.RoleId })
                     .HasName("PK_AccountUserRoles");
 
@@ -91,8 +98,8 @@ namespace StartFMS.Models.Backend {
                     .HasConstraintName("FK_AccountUserRoles_AccountRoles_RoleId");
             });
 
-            modelBuilder.Entity<A00AccountUserToken>(entity => {
-
+            modelBuilder.Entity<A00AccountUserToken>(entity =>
+            {
                 entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name })
                     .HasName("PK_AspNetUserTokens");
 
@@ -103,8 +110,8 @@ namespace StartFMS.Models.Backend {
                 entity.Property(e => e.Name).HasMaxLength(128);
             });
 
-            modelBuilder.Entity<A01AccountRole>(entity => {
-
+            modelBuilder.Entity<A01AccountRole>(entity =>
+            {
                 entity.ToTable("A01_AccountRoles");
 
                 entity.Property(e => e.Name).HasMaxLength(256);
@@ -112,8 +119,8 @@ namespace StartFMS.Models.Backend {
                 entity.Property(e => e.NormalizedName).HasMaxLength(256);
             });
 
-            modelBuilder.Entity<A01AccountRoleClaim>(entity => {
-
+            modelBuilder.Entity<A01AccountRoleClaim>(entity =>
+            {
                 entity.ToTable("A01_AccountRoleClaims");
 
                 entity.Property(e => e.RoleId).HasMaxLength(450);
@@ -124,11 +131,9 @@ namespace StartFMS.Models.Backend {
                     .HasConstraintName("FK_AccountRoleClaims_AccountRoles_RoleId");
             });
 
-            modelBuilder.Entity<B10LineMessageOption>(entity => {
-
+            modelBuilder.Entity<B10LineMessageOption>(entity =>
+            {
                 entity.ToTable("B10_LineMessageOption");
-
-                entity.Property(e => e.Id).HasMaxLength(400);
 
                 entity.Property(e => e.IsUse)
                     .HasMaxLength(10)
@@ -138,10 +143,14 @@ namespace StartFMS.Models.Backend {
                     .HasMaxLength(50)
                     .HasColumnName("type")
                     .HasDefaultValueSql("('')");
+
+                entity.Property(e => e.UserId)
+                    .HasMaxLength(400)
+                    .HasDefaultValueSql("('')");
             });
 
-            modelBuilder.Entity<B10LineMessageType>(entity => {
-
+            modelBuilder.Entity<B10LineMessageType>(entity =>
+            {
                 entity.HasKey(e => e.TypeId);
 
                 entity.ToTable("B10_LineMessageType");
@@ -153,6 +162,21 @@ namespace StartFMS.Models.Backend {
                     .HasDefaultValueSql("('')");
 
                 entity.Property(e => e.TypeName).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<S01MenuBasicSetting>(entity =>
+            {
+                entity.ToTable("S01_MenuBasicSetting");
+
+                entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.MenuMemo).HasMaxLength(10);
+
+                entity.Property(e => e.MenuName).HasMaxLength(10);
+
+                entity.Property(e => e.MenuType)
+                    .HasMaxLength(10)
+                    .HasComment("A: 一般、B: 報表、C: 其他");
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StartFMS.Models.Backend;
 using StartFMS.Backend.Extensions;
+using StartFMS.Extensions.Configuration;
 
 namespace StartFMS.Backend.API.Controllers;
 
@@ -39,9 +40,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("AccountUsers")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
     public string GetAccountUsers() {
-        UsersAuthorize users = new UsersAuthorize(Request);
         try {
             return JsonConvert.SerializeObject(_backendContext.A00AccountUsers.ToList());
         }
