@@ -29,7 +29,11 @@ namespace StartFMS.Models.Backend
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Data Source=DESKTOP-2HU7NL0\\SQLEXPRESS;Initial Catalog=StartFMS_Backend;Persist Security Info=True;User ID=sa;Password=root");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,13 +174,24 @@ namespace StartFMS.Models.Backend
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-                entity.Property(e => e.MenuMemo).HasMaxLength(10);
+                entity.Property(e => e.Description)
+                    .HasMaxLength(100)
+                    .HasDefaultValueSql("('')");
 
-                entity.Property(e => e.MenuName).HasMaxLength(10);
+                entity.Property(e => e.DisplayOrder).HasComment("顯示順序 (透過Id抓取，判斷在第幾層位置)");
 
-                entity.Property(e => e.MenuType)
-                    .HasMaxLength(10)
-                    .HasComment("A: 一般、B: 報表、C: 其他");
+                entity.Property(e => e.Icon)
+                    .HasMaxLength(50)
+                    .HasDefaultValueSql("('')")
+                    .HasComment("畫面Icon");
+
+                entity.Property(e => e.MenuName).HasMaxLength(30);
+
+                entity.Property(e => e.ParentId).HasComment("父層ID (目前設為 Id)");
+
+                entity.Property(e => e.Url)
+                    .HasMaxLength(255)
+                    .HasDefaultValueSql("('')");
             });
 
             OnModelCreatingPartial(modelBuilder);

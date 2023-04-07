@@ -7,10 +7,23 @@ namespace StartFMS.Models.Backend
     {
         public Guid Id { get; set; }
         public string MenuName { get; set; } = null!;
+        public string? Description { get; set; }
         /// <summary>
-        /// A: 一般、B: 報表、C: 其他
+        /// 顯示順序 (透過Id抓取，判斷在第幾層位置)
         /// </summary>
-        public string MenuType { get; set; } = null!;
-        public string MenuMemo { get; set; } = null!;
+        public int DisplayOrder { get; set; }
+        public string? Url { get; set; }
+        /// <summary>
+        /// 畫面Icon
+        /// </summary>
+        public string? Icon { get; set; }
+        /// <summary>
+        /// 父層ID (目前設為 Id)
+        /// </summary>
+        public Guid? ParentId { get; set; }
+
+
+        public ICollection<S01MenuBasicSetting>? Children { get; set; }
+        public S01MenuBasicSetting? Parent { get; set; }
     }
 }
