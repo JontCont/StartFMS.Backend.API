@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<A00_BackendContext>(content => {
-    content.UseSqlServer(config.GetConnectionString("Develop"));
+    content.UseSqlServer(config.GetConnectionString("Default"));
 });
 
 builder.Services.AddSwaggerGen(c =>
