@@ -19,7 +19,7 @@ public class JsonResult {
 
 [ApiController]
 [AllowAnonymous]
-[Route("api/identity/v1.0/")]
+[Route("api/auth/v1.0/")]
 public class UserAuthrizeV1Controller : Controller {
     private readonly ILogger<UserAuthrizeV1Controller> _logger;
     private readonly A00_BackendContext _context;
