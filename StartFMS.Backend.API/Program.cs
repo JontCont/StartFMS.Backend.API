@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using StartFMS.Backend.Extensions;
 using StartFMS.Extensions.Configuration;
 using StartFMS.Models.Backend;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = Config.GetConfiguration<Program>(); //加入設定檔
@@ -31,13 +35,22 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<A00_BackendContext>(content => {
-    content.UseSqlServer(config.GetConnectionString("Default"));
+    content.UseSqlServer(config.GetConnectionString("Develop"));
 });
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Start Five Minutes Backend API", Version = "v1" });
 });
+
+JwtHelpers jwtHelpers = new JwtHelpers()
+{
+    Signing = config.GetValue<string>("JwtSettings:KEY"),
+    Issuer = config.GetValue<string>("JwtSettings:Issuer"),
+    Audience = config.GetValue<string>("JwtSettings:Audience"),
+};
+builder.Services.AddSingleton<JwtHelpers>(jwtHelpers);
+
 
 var app = builder.Build();
 

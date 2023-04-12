@@ -6,6 +6,7 @@ using StartFMS.Models.Identity;
 using StartFMS.Backend.Extensions;
 using System.Net.Mail;
 using System.Security.Cryptography;
+using StartFMS.Backend.API.Dtos;
 
 namespace StartFMS.Backend.API.Controllers;
 
@@ -17,44 +18,35 @@ public class JsonResult {
 }
 
 [ApiController]
-[Route("[controller]")]
-public class IdentityController : Controller {
-    private readonly ILogger<IdentityController> _logger;
+[AllowAnonymous]
+[Route("api/identity/v1.0/")]
+public class UserAuthrizeV1Controller : Controller {
+    private readonly ILogger<UserAuthrizeV1Controller> _logger;
     private readonly A00_BackendContext _context;
+    private readonly JwtHelpers _jwtHelpers;
 
-    public IdentityController(
-        ILogger<IdentityController> logger,
-        A00_BackendContext backendContext) {
+    public UserAuthrizeV1Controller(
+        ILogger<UserAuthrizeV1Controller> logger,
+        A00_BackendContext backendContext, 
+        JwtHelpers jwtHelpers) {
         _logger = logger;
         _context = backendContext;
+        _jwtHelpers = jwtHelpers;
     }
 
-    [HttpPost(Name = "")]
-    public string PostFormIdentity(IdentityUsers identity) {
+    [HttpPost("Login")]
+    public string PostFormIdentity([FromBody] LoginPost identity) {
         var User = _context.A00AccountUsers
-            .Where(item => IsValidEmail(identity.Users) ? item.Email == identity.Users : item.UserName == identity.Users)
-            .Where(item => item.PasswordHash.ToUpper() == identity.Password.ToUpper()); 
+            .Where(item => IsValidEmail(identity.Account) ? item.Email == identity.Account : item.UserName == identity.Account)
+            .Where(item => item.PasswordHash.ToUpper() == identity.Password.ToUpper())
+            .SingleOrDefault(); 
 
-        if (!User.ToList().Any()) {
-            return JsonConvert.SerializeObject(new JsonResult {
-                Success = false,
-                Error = "403 Forbidden",
-                Message = "驗證身分失敗。"
-            });
+        if (User == null) {
+            return "帳號密碼錯誤";
         }
 
-        string resultToken = new JwtHelpers().GenerateToken(identity);
-
-        return string.IsNullOrEmpty(resultToken)
-            ? JsonConvert.SerializeObject(new JsonResult {
-                Success = false,
-                Error = "403 Forbidden",
-            })
-            : JsonConvert.SerializeObject(new JsonResult {
-                Success = true,
-                Message = "",
-                Token = resultToken
-            });
+        string resultToken = _jwtHelpers.GenerateToken(User.UserName);
+        return resultToken;
     }//PostFormIdentity()
 
     [HttpGet(Name = "")]
