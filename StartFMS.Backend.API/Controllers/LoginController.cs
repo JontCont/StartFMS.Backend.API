@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.Models.Backend;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using StartFMS.Extensions.Configuration;
 
 namespace StartFMS.Backend.API.Controllers;
 
@@ -29,19 +34,83 @@ public class LoginController : Controller
     [HttpPost]
     public string PostFormIdentity([FromBody] LoginPost identity)
     {
-        var User = _context.A00AccountUsers
-            .Where(item => IsValidEmail(identity.Account) ? item.Email == identity.Account : item.UserName == identity.Account)
-            .Where(item => item.PasswordHash.ToUpper() == identity.Password.ToUpper())
+        var user = _context.A00Accounts
+            .Where(item =>  item.Account == identity.Account)
+            .Where(item => item.Password == identity.Password)
             .SingleOrDefault();
 
-        if (User == null)
+        if (user == null)
         {
             return "帳號密碼錯誤";
         }
+        else
+        {
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Account),
+                    new Claim("FullName", user.Name),
+                    new Claim("EmployeeId", user.EmployeeId.ToString())
+                };
 
-        string resultToken = _jwtHelpers.GenerateToken(User.UserName);
-        return resultToken;
+            var role = from a in _context.A00Roles
+                       where a.EmployeeId == user.EmployeeId
+                       select a;
+
+            foreach (var temp in role)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, temp.Name));
+            }
+
+            var authProperties = new AuthenticationProperties
+            {
+                // ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(2)
+            };
+
+
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+            return "ok";
+        }
     }//PostFormIdentity()
+
+    [HttpPost("jwtLogin")]
+    public string jwtLogin(LoginPost value)
+    {
+        var user = (from a in _context.A00Accounts
+                    where a.Account == value.Account
+                    && a.Password == value.Password
+                    select a).SingleOrDefault();
+
+        if (user == null)
+        {
+            return "帳號密碼錯誤";
+        }
+        else
+        {
+
+            var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Email, user.Account),
+                    new Claim("FullName", user.Name),
+                    new Claim(JwtRegisteredClaimNames.NameId, user.EmployeeId.ToString()),
+                    new Claim("EmployeeId", user.EmployeeId.ToString())
+                };
+
+            var role = from a in _context.A00Roles
+                       where a.EmployeeId == user.EmployeeId
+                       select a;
+
+            foreach (var temp in role)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, temp.Name));
+            }
+
+            var token = _jwtHelpers.GenerateToken(claims);
+            return token;
+        }
+    }
 
     [HttpDelete]
     public void logout()

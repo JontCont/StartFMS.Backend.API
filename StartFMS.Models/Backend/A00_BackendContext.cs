@@ -16,13 +16,10 @@ namespace StartFMS.Models.Backend
         {
         }
 
-        public virtual DbSet<A00AccountUser> A00AccountUsers { get; set; } = null!;
-        public virtual DbSet<A00AccountUserClaim> A00AccountUserClaims { get; set; } = null!;
-        public virtual DbSet<A00AccountUserLogin> A00AccountUserLogins { get; set; } = null!;
-        public virtual DbSet<A00AccountUserRole> A00AccountUserRoles { get; set; } = null!;
-        public virtual DbSet<A00AccountUserToken> A00AccountUserTokens { get; set; } = null!;
-        public virtual DbSet<A01AccountRole> A01AccountRoles { get; set; } = null!;
-        public virtual DbSet<A01AccountRoleClaim> A01AccountRoleClaims { get; set; } = null!;
+        public virtual DbSet<A00Account> A00Accounts { get; set; } = null!;
+        public virtual DbSet<A00Division> A00Divisions { get; set; } = null!;
+        public virtual DbSet<A00JobTitle> A00JobTitles { get; set; } = null!;
+        public virtual DbSet<A00Role> A00Roles { get; set; } = null!;
         public virtual DbSet<B10LineMessageOption> B10LineMessageOptions { get; set; } = null!;
         public virtual DbSet<B10LineMessageType> B10LineMessageTypes { get; set; } = null!;
         public virtual DbSet<S01MenuBasicSetting> S01MenuBasicSettings { get; set; } = null!;
@@ -38,101 +35,64 @@ namespace StartFMS.Models.Backend
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<A00AccountUser>(entity =>
+            modelBuilder.Entity<A00Account>(entity =>
             {
-                entity.ToTable("A00_AccountUsers");
+                entity.HasKey(e => e.EmployeeId)
+                    .HasName("PK__A00_Acco__7AD04F11B573F9A5");
 
-                entity.Property(e => e.Email).HasMaxLength(256);
+                entity.ToTable("A00_Account");
 
-                entity.Property(e => e.FirstName).HasMaxLength(20);
+                entity.Property(e => e.EmployeeId).HasDefaultValueSql("(newid())");
 
-                entity.Property(e => e.IsUse).HasMaxLength(20);
+                entity.Property(e => e.Name).HasMaxLength(50);
 
-                entity.Property(e => e.LastName).HasMaxLength(20);
+                entity.HasOne(d => d.Division)
+                    .WithMany(p => p.A00Accounts)
+                    .HasForeignKey(d => d.DivisionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Employee_ToTable_1");
 
-                entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
-
-                entity.Property(e => e.Rfid)
-                    .HasMaxLength(20)
-                    .HasColumnName("RFID");
-
-                entity.Property(e => e.UserName).HasMaxLength(256);
+                entity.HasOne(d => d.JobTitle)
+                    .WithMany(p => p.A00Accounts)
+                    .HasForeignKey(d => d.JobTitleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Employee_ToTable");
             });
 
-            modelBuilder.Entity<A00AccountUserClaim>(entity =>
+            modelBuilder.Entity<A00Division>(entity =>
             {
-                entity.ToTable("A00_AccountUserClaims");
+                entity.HasKey(e => e.DivisionId)
+                    .HasName("PK__A00_Divi__20EFC6A8CCB5E78C");
 
-                entity.Property(e => e.UserId).HasMaxLength(450);
+                entity.ToTable("A00_Division");
 
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.A00AccountUserClaims)
-                    .HasForeignKey(d => d.UserId);
+                entity.Property(e => e.DivisionId).ValueGeneratedNever();
+
+                entity.Property(e => e.Name).HasMaxLength(50);
             });
 
-            modelBuilder.Entity<A00AccountUserLogin>(entity =>
+            modelBuilder.Entity<A00JobTitle>(entity =>
             {
-                entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
+                entity.HasKey(e => e.JobTitleId)
+                    .HasName("PK__A00_JobT__35382FE99AC0583C");
 
-                entity.ToTable("A00_AccountUserLogins");
+                entity.ToTable("A00_JobTitle");
 
-                entity.Property(e => e.LoginProvider).HasMaxLength(128);
+                entity.Property(e => e.JobTitleId).ValueGeneratedNever();
 
-                entity.Property(e => e.ProviderKey).HasMaxLength(128);
-
-                entity.Property(e => e.UserId).HasMaxLength(450);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.A00AccountUserLogins)
-                    .HasForeignKey(d => d.UserId);
+                entity.Property(e => e.Name).HasMaxLength(50);
             });
 
-            modelBuilder.Entity<A00AccountUserRole>(entity =>
+            modelBuilder.Entity<A00Role>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.RoleId })
-                    .HasName("PK_AccountUserRoles");
+                entity.HasKey(e => e.RoleId)
+                    .HasName("PK__A00_Role__8AFACE1A3E7C0A0F");
 
-                entity.ToTable("A00_AccountUserRoles");
+                entity.ToTable("A00_Role");
 
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.A00AccountUserRoles)
-                    .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK_AccountUserRoles_AccountRoles_RoleId");
-            });
+                entity.Property(e => e.RoleId).HasDefaultValueSql("(newid())");
 
-            modelBuilder.Entity<A00AccountUserToken>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name })
-                    .HasName("PK_AspNetUserTokens");
-
-                entity.ToTable("A00_AccountUserTokens");
-
-                entity.Property(e => e.LoginProvider).HasMaxLength(128);
-
-                entity.Property(e => e.Name).HasMaxLength(128);
-            });
-
-            modelBuilder.Entity<A01AccountRole>(entity =>
-            {
-                entity.ToTable("A01_AccountRoles");
-
-                entity.Property(e => e.Name).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedName).HasMaxLength(256);
-            });
-
-            modelBuilder.Entity<A01AccountRoleClaim>(entity =>
-            {
-                entity.ToTable("A01_AccountRoleClaims");
-
-                entity.Property(e => e.RoleId).HasMaxLength(450);
-
-                entity.HasOne(d => d.Role)
-                    .WithMany(p => p.A01AccountRoleClaims)
-                    .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK_AccountRoleClaims_AccountRoles_RoleId");
+                entity.Property(e => e.Name).HasMaxLength(50);
             });
 
             modelBuilder.Entity<B10LineMessageOption>(entity =>

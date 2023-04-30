@@ -131,6 +131,44 @@ public class JwtHelpers
         return serializeToken;
     }
 
+    /// <summary>
+    /// 從 BDP080 取得資料登入 
+    /// </summary>
+    /// <param name="userAutos">使用者驗證</param>
+    /// <param name="expireMinutes">時效</param>
+    /// <returns></returns>
+    public string GenerateToken(List<Claim> claims, int expireMinutes = 30)
+    {
+        var userClaimsIdentity = new ClaimsIdentity(claims);
+
+        // Create a SymmetricSecurityKey for JWT Token signatures
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Signing));
+
+        // HmacSha256 MUST be larger than 128 bits, so the key can't be too short. At least 16 and more characters.
+        // https://stackoverflow.com/questions/47279947/idx10603-the-algorithm-hs256-requires-the-securitykey-keysize-to-be-greater
+        var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+
+        // Create SecurityTokenDescriptor
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Issuer = Issuer,
+            // Audience = Issuer, // Sometimes you don't have to define Audience.
+            // NotBefore = DateTime.Now, // Default is DateTime.Now
+            // IssuedAt = DateTime.Now, // Default is DateTime.Now
+            // Signing = userClaimsIdentity,
+            Expires = DateTime.Now.AddMinutes(expireMinutes),
+            SigningCredentials = signingCredentials
+        };
+
+        // Generate a JWT securityToken, than get the serialized Token result (string)
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+        var serializeToken = tokenHandler.WriteToken(securityToken);
+
+        return serializeToken;
+    }
+
+
     //------------------------
 
     /// <summary>
