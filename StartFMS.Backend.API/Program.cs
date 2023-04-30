@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.Extensions;
 using StartFMS.Extensions.Configuration;
 using StartFMS.Models.Backend;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = Config.GetConfiguration<Program>(); //加入設定檔
@@ -34,9 +36,16 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddDbContext<A00_BackendContext>(content => {
-    content.UseSqlServer(config.GetConnectionString("Develop"));
+builder.Services.AddControllers(services => {
+    services.Filters.Add(typeof(AuthorizationFilter));
+    services.Filters.Add(typeof(LogActionFilters));
+    services.Filters.Add(typeof(LogExceptionFilter));
 });
+
+
+//builder.Services.AddDbContext<A00_BackendContext>(content => {
+//    content.UseSqlServer(config.GetConnectionString("Develop"));
+//});
 
 builder.Services.AddSwaggerGen(c =>
 {

@@ -34,21 +34,6 @@ public class UserAuthrizeV1Controller : Controller {
         _jwtHelpers = jwtHelpers;
     }
 
-    [HttpPost("Login")]
-    public string PostFormIdentity([FromBody] LoginPost identity) {
-        var User = _context.A00AccountUsers
-            .Where(item => IsValidEmail(identity.Account) ? item.Email == identity.Account : item.UserName == identity.Account)
-            .Where(item => item.PasswordHash.ToUpper() == identity.Password.ToUpper())
-            .SingleOrDefault(); 
-
-        if (User == null) {
-            return "帳號密碼錯誤";
-        }
-
-        string resultToken = _jwtHelpers.GenerateToken(User.UserName);
-        return resultToken;
-    }//PostFormIdentity()
-
     [HttpGet(Name = "")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public string GetFormIdentity() {
@@ -64,15 +49,4 @@ public class UserAuthrizeV1Controller : Controller {
             : JsonConvert.SerializeObject(new JsonResult { Success = false }, Formatting.None);
     }//GetFormIdentity()
 
-
-
-    static bool IsValidEmail(string email) {
-        try {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
-        }
-        catch {
-            return false;
-        }
-    }
 }
