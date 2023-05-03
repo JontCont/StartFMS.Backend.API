@@ -5,12 +5,13 @@ using Newtonsoft.Json;
 using StartFMS.Models.Backend;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StartFMS.Backend.API.Controllers
 {
 
     [ApiController]
-    [Route("api/user/menus")]
+    [Route("api/userz/menus")]
     //[Route("api/user/{id}/[controller]")]
     public class MenusController : ControllerBase
     {
@@ -27,7 +28,9 @@ namespace StartFMS.Backend.API.Controllers
                 .OrderBy(m => m.DisplayOrder) // 依照 DisplayOrder 排序
                 .ToList();
 
-            var rootItems = menuItems.Where(m => m.ParentId == null).OrderBy(x=>x.DisplayOrder); // 取得根菜單項目
+            var rootItems = menuItems
+                .Where(m => m.ParentId == null)
+                .OrderBy(x=>x.DisplayOrder); // 取得根菜單項目
 
             foreach (var item in rootItems)
             {
@@ -42,6 +45,7 @@ namespace StartFMS.Backend.API.Controllers
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
                 MaxDepth = 128,
             });
 
