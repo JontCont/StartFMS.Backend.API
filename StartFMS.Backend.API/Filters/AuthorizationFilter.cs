@@ -24,27 +24,15 @@ public class AuthorizationFilter : Attribute, IAuthorizationFilter
 
         if (ignore == null)
         {
-            if (tokenFlag)
-            {
-                if (outValue != "123")
-                {
-                    context.Result = new JsonResult(new RetrunJson()
-                    {
-                        Data = "test1",
-                        HttpCode = 401,
-                        ErrorMessage = "沒有登入"
-                    });
-                    context.Result = new UnauthorizedResult();
-                }
-            }
-            else
+            if (!tokenFlag || string.IsNullOrEmpty(outValue))
             {
                 context.Result = new JsonResult(new RetrunJson()
                 {
-                    Data = "test2",
+                    Data = "test1",
                     HttpCode = 401,
                     ErrorMessage = "沒有登入"
                 });
+                context.Result = new UnauthorizedResult();
             }
         }//if (ignore == null)
 
