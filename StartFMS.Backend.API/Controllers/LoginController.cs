@@ -1,21 +1,20 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.Models.Backend;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using StartFMS.Extensions.Configuration;
+using System.Security.Claims;
 
 namespace StartFMS.Backend.API.Controllers;
 
+[AllowAnonymous]
+[ApiController]
+[Route("api/auth/v1.0/Login/")]
 public class LoginController : Controller
 {
-
     private readonly ILogger<UserAuthrizeV1Controller> _logger;
     private readonly A00_BackendContext _context;
     private readonly JwtHelpers _jwtHelpers;
