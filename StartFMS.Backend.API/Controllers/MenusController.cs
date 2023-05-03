@@ -10,7 +10,7 @@ namespace StartFMS.Backend.API.Controllers
 {
 
     [ApiController]
-    [Route("api/user/[controller]")]
+    [Route("api/user/menus")]
     //[Route("api/user/{id}/[controller]")]
     public class MenusController : ControllerBase
     {
