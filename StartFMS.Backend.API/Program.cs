@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.Extensions;
@@ -36,20 +37,52 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddControllers(services => {
+builder.Services.AddControllers(services =>
+{
     services.Filters.Add(typeof(AuthorizationFilter));
     services.Filters.Add(typeof(LogActionFilters));
     services.Filters.Add(typeof(LogExceptionFilter));
 });
 
 
-//builder.Services.AddDbContext<A00_BackendContext>(content => {
-//    content.UseSqlServer(config.GetConnectionString("Develop"));
-//});
+builder.Services.AddDbContext<A00_BackendContext>(content =>
+{
+    content.UseSqlServer(config.GetConnectionString("Develop"));
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Start Five Minutes Backend API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Start Five Minutes Backend API",
+        Version = "v1"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization"
+    });
+
+    c.AddSecurityRequirement(
+    new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 
 JwtHelpers jwtHelpers = new JwtHelpers()
