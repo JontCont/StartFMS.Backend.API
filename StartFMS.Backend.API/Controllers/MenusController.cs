@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace StartFMS.Backend.API.Controllers
 {
-
+    [AllowAnonymous]
     [ApiController]
-    [Route("api/userz/menus")]
+    [Route("api/users/menus")]
     //[Route("api/user/{id}/[controller]")]
     public class MenusController : ControllerBase
     {
