@@ -23,6 +23,7 @@ namespace StartFMS.Models.Backend
         public virtual DbSet<B10LineMessageOption> B10LineMessageOptions { get; set; } = null!;
         public virtual DbSet<B10LineMessageType> B10LineMessageTypes { get; set; } = null!;
         public virtual DbSet<S01MenuBasicSetting> S01MenuBasicSettings { get; set; } = null!;
+        public virtual DbSet<S10SystemConfig> S10SystemConfigs { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -147,6 +148,25 @@ namespace StartFMS.Models.Backend
                 entity.Property(e => e.Url)
                     .HasMaxLength(255)
                     .HasDefaultValueSql("('')");
+            });
+
+            modelBuilder.Entity<S10SystemConfig>(entity =>
+            {
+                entity.HasKey(e => e.ParName);
+
+                entity.ToTable("S10_SystemConfig");
+
+                entity.Property(e => e.ParName)
+                    .HasMaxLength(20)
+                    .HasColumnName("par_name");
+
+                entity.Property(e => e.ParMemo)
+                    .HasMaxLength(1000)
+                    .HasColumnName("par_memo");
+
+                entity.Property(e => e.ParValue)
+                    .HasMaxLength(500)
+                    .HasColumnName("par_value");
             });
 
             OnModelCreatingPartial(modelBuilder);
