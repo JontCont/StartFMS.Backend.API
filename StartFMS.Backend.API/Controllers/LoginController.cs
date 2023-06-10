@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.Models.Backend;
@@ -84,7 +86,11 @@ public class LoginController : Controller
 
         if (user == null)
         {
-            return "帳號密碼錯誤";
+            return JsonConvert.SerializeObject(new
+            {
+                success = false,
+                message = "帳號/密碼錯誤",
+            });
         }
         else
         {
@@ -107,7 +113,11 @@ public class LoginController : Controller
             }
 
             var token = _jwtHelpers.GenerateToken(claims);
-            return token;
+            return JsonConvert.SerializeObject(new
+            {
+                success = (!string.IsNullOrEmpty(token)),
+                token = token,
+            });
         }
     }
 
