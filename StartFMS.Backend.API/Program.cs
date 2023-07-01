@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StartFMS.Backend.API.Filters;
+using StartFMS.Backend.API.Migrations;
 using StartFMS.Backend.Extensions;
 using StartFMS.Extensions.Configuration;
 using StartFMS.Models.Backend;

@@ -6,6 +6,7 @@ namespace StartFMS.Models.Backend
     public partial class B10LineMessageType
     {
         public string TypeId { get; set; } = null!;
+        public string TypeCode { get; set; } = null!;
         public string TypeName { get; set; } = null!;
         public string? TypeMemo { get; set; }
     }

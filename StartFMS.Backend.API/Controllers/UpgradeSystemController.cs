@@ -6,10 +6,13 @@ using StartFMS.Models.Backend;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace StartFMS.Backend.API.Controllers
 {
-    //[AllowAnonymous]
+    [AllowAnonymous]
     [ApiController]
     [Route("api/sys/up/")]
     public class UpgradeSystemController : ControllerBase
@@ -24,27 +27,20 @@ namespace StartFMS.Backend.API.Controllers
         [HttpGet("version")]
         public string Get_DataBase_Version()
         {
-            var data =_BackendContext.Database.GetAppliedMigrations();
-            var json = JsonConvert.SerializeObject(data);
+            var latestMigration = _BackendContext.GetService<IHistoryRepository>()
+                .GetAppliedMigrations()
+                .OrderByDescending(m => m.MigrationId)
+                .FirstOrDefault();
+
+            var productVersion = latestMigration?.ProductVersion;
+            var json = JsonConvert.SerializeObject(productVersion);
             return json;
         }
-
-        [HttpGet("create")]
-        public async Task<ActionResult<string>> CreateDataBase()
-        {
-            bool status = await _BackendContext.Database.EnsureCreatedAsync();
-            var json = JsonConvert.SerializeObject(new
-            {
-                success = status,
-                message = status ? "完成更新" : "更新失敗"
-            });
-            return json;
-        }
-
 
         [HttpGet("update")]
         public async Task<ActionResult<string>> UpdateDataBase()
         {
+
             await _BackendContext.Database.MigrateAsync();
             var json = JsonConvert.SerializeObject(new
             {

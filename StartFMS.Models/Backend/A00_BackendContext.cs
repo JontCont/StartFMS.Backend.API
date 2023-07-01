@@ -122,6 +122,7 @@ namespace StartFMS.Models.Backend
                     .HasDefaultValueSql("('')");
 
                 entity.Property(e => e.TypeName).HasMaxLength(50);
+                entity.Property(e => e.TypeCode).HasMaxLength(50);
             });
 
             modelBuilder.Entity<S01MenuBasicSetting>(entity =>

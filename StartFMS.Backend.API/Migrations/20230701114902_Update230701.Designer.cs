@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StartFMS.Models.Backend;
 
@@ -11,9 +12,10 @@ using StartFMS.Models.Backend;
 namespace StartFMS.Backend.API.Migrations
 {
     [DbContext(typeof(A00_BackendContext))]
-    partial class A00_BackendContextModelSnapshot : ModelSnapshot
+    [Migration("20230701114902_Update230701")]
+    partial class Update230701
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
