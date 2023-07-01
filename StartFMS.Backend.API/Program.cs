@@ -47,7 +47,9 @@ builder.Services.AddControllers(services =>
 
 builder.Services.AddDbContext<A00_BackendContext>(content =>
 {
-    content.UseSqlServer(config.GetConnectionString("Develop"));
+    content.UseSqlServer(config.GetConnectionString("Develop"), b => {
+        b.MigrationsAssembly("StartFMS.Backend.API");
+    });
 });
 
 builder.Services.AddSwaggerGen(c =>
