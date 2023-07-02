@@ -12,7 +12,6 @@ namespace StartFMS.Backend.API.Controllers
     [AllowAnonymous]
     [ApiController]
     [Route("api/users/menus")]
-    //[Route("api/user/{id}/[controller]")]
     public class MenusController : ControllerBase
     {
         private readonly A00_BackendContext _BackendContext;
