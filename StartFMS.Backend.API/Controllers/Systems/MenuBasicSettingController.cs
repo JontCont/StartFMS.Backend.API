@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StartFMS.Models.Backend;
 using System.Data.Common;
 
-namespace StartFMS.Backend.API.Controllers;
+namespace StartFMS.Backend.API.Controllers.Systems;
 
 
 [ApiController]
@@ -21,7 +21,7 @@ public class MenuBasicSettingController : ControllerBase
     public ActionResult<S01MenuBasicSetting> Get_MenuBasicSetting(Guid id)
     {
         var result = _BackendContext.S01MenuBasicSettings.Find(id);
-        return (result == null) ? NotFound() : result;
+        return result == null ? NotFound() : result;
     }
 
     [HttpPost]
@@ -44,13 +44,13 @@ public class MenuBasicSettingController : ControllerBase
         }
         catch (DbException ex)
         {
-            if(!_BackendContext.S01MenuBasicSettings.Any(x=>x.Id == id))
+            if (!_BackendContext.S01MenuBasicSettings.Any(x => x.Id == id))
             {
                 return NotFound();
             }
             else
             {
-                return StatusCode(500,"存取發生錯誤");
+                return StatusCode(500, "存取發生錯誤");
             }
         }
 

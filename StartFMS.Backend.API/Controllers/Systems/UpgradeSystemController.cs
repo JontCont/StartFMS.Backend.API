@@ -10,7 +10,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace StartFMS.Backend.API.Controllers
+namespace StartFMS.Backend.API.Controllers.Systems
 {
     [AllowAnonymous]
     [ApiController]

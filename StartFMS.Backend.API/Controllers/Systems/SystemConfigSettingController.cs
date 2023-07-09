@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using StartFMS.Models.Backend;
 using System.Data.Common;
 
-namespace StartFMS.Backend.API.Controllers;
+namespace StartFMS.Backend.API.Controllers.Systems;
 
 [AllowAnonymous]
 [ApiController]
@@ -22,7 +22,7 @@ public class SystemConfigSettingController : ControllerBase
     class columnsProp
     {
         public string name { get; set; }
-        public string label { get; set;}
+        public string label { get; set; }
         public bool hidden { get; set; } = false;
     }
 
@@ -35,7 +35,8 @@ public class SystemConfigSettingController : ControllerBase
             new columnsProp{ name = "ParValue", label ="ParValue" },
             new columnsProp{ name = "ParMemo", label ="ParMemo" },
         };
-        return JsonConvert.SerializeObject(new { 
+        return JsonConvert.SerializeObject(new
+        {
             columns = columsList,
             data = result
         });
@@ -45,7 +46,7 @@ public class SystemConfigSettingController : ControllerBase
     public ActionResult<S10SystemConfig> Get_MenuBasicSetting(string id)
     {
         var result = _BackendContext.S10SystemConfigs.Find(id);
-        return (result == null) ? NotFound() : result;
+        return result == null ? NotFound() : result;
     }
 
     [HttpPost]
@@ -68,13 +69,13 @@ public class SystemConfigSettingController : ControllerBase
         }
         catch (DbException ex)
         {
-            if(!_BackendContext.S10SystemConfigs.Any(x=>x.ParName == id))
+            if (!_BackendContext.S10SystemConfigs.Any(x => x.ParName == id))
             {
                 return NotFound();
             }
             else
             {
-                return StatusCode(500,"存取發生錯誤");
+                return StatusCode(500, "存取發生錯誤");
             }
         }
 

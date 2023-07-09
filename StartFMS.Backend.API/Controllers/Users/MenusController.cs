@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 
-namespace StartFMS.Backend.API.Controllers
+namespace StartFMS.Backend.API.Controllers.Users
 {
     [AllowAnonymous]
     [ApiController]
@@ -29,7 +29,7 @@ namespace StartFMS.Backend.API.Controllers
 
             var rootItems = menuItems
                 .Where(m => m.ParentId == null)
-                .OrderBy(x=>x.DisplayOrder); // 取得根菜單項目
+                .OrderBy(x => x.DisplayOrder); // 取得根菜單項目
 
             foreach (var item in rootItems)
             {
