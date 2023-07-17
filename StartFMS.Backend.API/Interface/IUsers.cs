@@ -4,7 +4,7 @@
     {
         bool Login(string userName, string password);
 
-
+        string? GetAuthrizeToken();
         string? GetUserName();
     }
 }
