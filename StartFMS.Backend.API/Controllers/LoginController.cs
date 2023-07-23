@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StartFMS.Backend.API.Controllers.Users;
 using StartFMS.Backend.API.Dtos;
+using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
 using StartFMS.Models.Backend;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,13 +22,15 @@ public class LoginController : Controller
     private readonly ILogger<UserAuthrizeV1Controller> _logger;
     private readonly A00_BackendContext _context;
     private readonly JwtHelpers _jwtHelpers;
-
+    private readonly IUsers _users;
     public LoginController(
         ILogger<UserAuthrizeV1Controller> logger,
+        IUsers users,
         A00_BackendContext backendContext,
         JwtHelpers jwtHelpers)
     {
         _logger = logger;
+        _users = users;
         _context = backendContext;
         _jwtHelpers = jwtHelpers;
     }
@@ -80,46 +83,25 @@ public class LoginController : Controller
     [HttpPost("jwtLogin")]
     public string jwtLogin(LoginPost value)
     {
-        var user = (from a in _context.A00Accounts
-                    where a.Account == value.Account
-                    && a.Password == value.Password
-                    select a).SingleOrDefault();
+        if (!_users.Login(value.Account, value.Password)) {
+            var msg = _users.ErrorMessage;
 
-        if (user == null)
-        {
             return JsonConvert.SerializeObject(new
             {
                 success = false,
-                message = "帳號/密碼錯誤",
+                message = msg,
             });
         }
-        else
+
+        var userName = _users.GetUserName();
+        var token = _users.GetAuthrizeToken();
+
+        return JsonConvert.SerializeObject(new
         {
-
-            var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Email, user.Account),
-                    new Claim("FullName", user.Name),
-                    new Claim(JwtRegisteredClaimNames.NameId, user.EmployeeId.ToString()),
-                    new Claim("EmployeeId", user.EmployeeId.ToString())
-                };
-
-            var role = from a in _context.A00Roles
-                       where a.EmployeeId == user.EmployeeId
-                       select a;
-
-            foreach (var temp in role)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-            }
-
-            var token = _jwtHelpers.GenerateToken(claims);
-            return JsonConvert.SerializeObject(new
-            {
-                success = (!string.IsNullOrEmpty(token)),
-                token = token,
-            });
-        }
+            success = true,
+            token = token,
+            user = userName,
+        });
     }
 
     [HttpDelete]

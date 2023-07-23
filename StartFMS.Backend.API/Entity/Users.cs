@@ -13,16 +13,24 @@ namespace StartFMS.Backend.API.Entity;
 public class UserManager : IUsers
 {
     public string ErrorMessage => errorMessage;
-
+    
     //區塊變數
     private string errorMessage { get; set; } = string.Empty;
     private Guid? userId { get; set; }
+    private string Signing { get; set; }
+    private string Issuer { get; set; }
+    private string Audience { get; set; }
 
     //共用變數
     private A00_BackendContext _BackendContext { get; set; }
     private ILogger _Logger { get; set; }
-    public UserManager(ILogger<UserManager>? logger, A00_BackendContext context)
+    public UserManager(string signing, string issuer, string audience, 
+        ILogger<UserManager>? logger, A00_BackendContext context)
     {
+        Signing = signing;
+        Issuer = issuer;
+        Audience = audience;
+
         _Logger = logger;
         _BackendContext = context;
     }
@@ -59,7 +67,7 @@ public class UserManager : IUsers
             }
         }
 
-        return isFail;
+        return !isFail;
     }
 
     public string? GetUserName()
@@ -125,7 +133,7 @@ public class UserManager : IUsers
     {
         var userClaimsIdentity = new ClaimsIdentity(claims);
         // Create a SymmetricSecurityKey for JWT Token signatures
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ASDZXASDHAUISDHASDOHAHSDUAHDS"));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Signing));
 
         // HmacSha256 MUST be larger than 128 bits, so the key can't be too short. At least 16 and more characters.
         // https://stackoverflow.com/questions/47279947/idx10603-the-algorithm-hs256-requires-the-securitykey-keysize-to-be-greater
@@ -134,8 +142,8 @@ public class UserManager : IUsers
         // Create SecurityTokenDescriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Issuer = "test",
-            // Audience = Issuer, // Sometimes you don't have to define Audience.
+            Issuer = Issuer,
+            Audience = Audience, // Sometimes you don't have to define Audience.
             // NotBefore = DateTime.Now, // Default is DateTime.Now
             // IssuedAt = DateTime.Now, // Default is DateTime.Now
             Subject = userClaimsIdentity,
