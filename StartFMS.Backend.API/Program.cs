@@ -1,19 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StartFMS.Backend.API.Entity;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.API.Interface;
-using StartFMS.Backend.API.Migrations;
 using StartFMS.Backend.Extensions;
 using StartFMS.Extensions.Configuration;
 using StartFMS.Models.Backend;
-using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.ConfigureLogging(logging =>

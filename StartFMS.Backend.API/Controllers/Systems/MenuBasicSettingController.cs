@@ -17,6 +17,14 @@ public class MenuBasicSettingController : ControllerBase
         _BackendContext = BackendContext;
     }
 
+
+    [HttpGet()]
+    public ActionResult<IEnumerable<S01MenuBasicSetting>> Get_MenuBasicSetting()
+    {
+        var result = _BackendContext.S01MenuBasicSettings;
+        return result == null ? NotFound() : result;
+    }
+
     [HttpGet("{id}")]
     public ActionResult<S01MenuBasicSetting> Get_MenuBasicSetting(Guid id)
     {

@@ -11,16 +11,17 @@ internal class UsersAuthorize {
     public string ConnectString { get; set; }
 
     public UsersAuthorize(HttpRequest request) {
-        string authHeader =
-            (request.Headers.Where(x => x.Key == "Authorization").Any())
+        string? authHeader =
+            (request.Headers.Any(x => x.Key == "Authorization"))
             ? request.Headers["Authorization"]
             : request.Cookies["x-access-token"];
-        authHeader = authHeader.Replace("Bearer ", "");
+        authHeader = authHeader?.Replace("Bearer ", "");
 
         JwtSecurityTokenHandler handler = new();
         var securityToken = handler.ReadToken(authHeader) as JwtSecurityToken;
         Users = JwtHelpers.GetPayLoadData(securityToken);
     }
+
     public UsersAuthorize(string cookieKey, HttpRequest request) {
         string authHeader = request.Cookies[cookieKey];
         authHeader = authHeader.Replace("Bearer ", "");
