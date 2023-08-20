@@ -29,7 +29,7 @@ namespace StartFMS.Backend.API.Filters
             };
 
             string text = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}] [Info] : {result} \n";
-            File.AppendAllText($"{rootRoot}ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt", text);
+            //File.AppendAllText($"{rootRoot}ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt", text);
 
         }
 
@@ -51,7 +51,7 @@ namespace StartFMS.Backend.API.Filters
             };
 
             string text = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}] [Info] : {result} \n";
-            File.AppendAllText($"{rootRoot}ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt", text);
+            //File.AppendAllText($"{rootRoot}ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt", text);
         }
     }
 }
