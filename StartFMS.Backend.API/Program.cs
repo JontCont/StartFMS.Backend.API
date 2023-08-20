@@ -6,6 +6,8 @@ using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
 using StartFMS.Extensions.Configuration;
 using StartFMS.Models.Backend;
+using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.ConfigureLogging(logging =>
@@ -46,6 +48,12 @@ builder.Services.AddControllers(services =>
     services.Filters.Add(typeof(LogActionFilters));
     services.Filters.Add(typeof(LogExceptionFilter));
 });
+
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
+    });
 
 
 builder.Services.AddDbContext<A00_BackendContext>(content =>
