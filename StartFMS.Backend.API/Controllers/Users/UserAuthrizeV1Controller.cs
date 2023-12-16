@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using StartFMS.Models.Backend;
-using StartFMS.Models.Identity;
 using StartFMS.Backend.Extensions;
-using System.Net.Mail;
-using System.Security.Cryptography;
-using StartFMS.Backend.API.Dtos;
+using StartFMS.EF;
 
 namespace StartFMS.Backend.API.Controllers.Users;
 
@@ -24,12 +20,12 @@ public class JsonResult
 public class UserAuthrizeV1Controller : Controller
 {
     private readonly ILogger<UserAuthrizeV1Controller> _logger;
-    private readonly A00_BackendContext _context;
+    private readonly StartFmsBackendContext _context;
     private readonly JwtHelpers _jwtHelpers;
 
     public UserAuthrizeV1Controller(
         ILogger<UserAuthrizeV1Controller> logger,
-        A00_BackendContext backendContext,
+        StartFmsBackendContext backendContext,
         JwtHelpers jwtHelpers)
     {
         _logger = logger;

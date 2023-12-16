@@ -4,23 +4,16 @@ using StartFMS.Backend.API.Entity;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
+using StartFMS.EF;
 using StartFMS.Extensions.Configuration;
-using StartFMS.Models.Backend;
-using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.ConfigureLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole();
-    //logging.AddFile("app.log");
-});
+builder.Logging.ClearProviders().AddConsole();
 var config = Config.GetConfiguration<Program>(); //加入設定檔
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -56,9 +49,10 @@ builder.Services.AddControllersWithViews()
     });
 
 
-builder.Services.AddDbContext<A00_BackendContext>(content =>
+builder.Services.AddDbContext<StartFmsBackendContext>(content =>
 {
-    content.UseSqlServer(config.GetConnectionString("Develop"), b => {
+    content.UseSqlServer(config.GetConnectionString("Develop"), b =>
+    {
         b.MigrationsAssembly("StartFMS.Backend.API");
     });
 });
@@ -72,7 +66,7 @@ builder.Services.AddScoped<IUsers>(provider =>
     var audience = config.GetValue<string>("JwtSettings:Audience");
 
     return ActivatorUtilities.CreateInstance<UserManager>(provider, signing, issuer, audience,
-                                                          provider.GetRequiredService<A00_BackendContext>(),
+                                                          provider.GetRequiredService<StartFmsBackendContext>(),
                                                           provider.GetRequiredService<ILogger<UserManager>>());
 });
 
@@ -113,9 +107,9 @@ builder.Services.AddSwaggerGen(c =>
 
 JwtHelpers jwtHelpers = new JwtHelpers()
 {
-    Signing = config.GetValue<string>("JwtSettings:KEY"),
-    Issuer = config.GetValue<string>("JwtSettings:Issuer"),
-    Audience = config.GetValue<string>("JwtSettings:Audience"),
+    Signing = config.GetValue<string>("JwtSettings:KEY") ?? "",
+    Issuer = config.GetValue<string>("JwtSettings:Issuer") ?? "",
+    Audience = config.GetValue<string>("JwtSettings:Audience") ?? "",
 };
 builder.Services.AddSingleton(jwtHelpers);
 

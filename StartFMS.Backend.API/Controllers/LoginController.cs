@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using StartFMS.Backend.API.Controllers.Users;
 using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
-using StartFMS.Models.Backend;
-using System.IdentityModel.Tokens.Jwt;
+using StartFMS.EF;
 using System.Security.Claims;
 
 namespace StartFMS.Backend.API.Controllers;
@@ -20,13 +18,13 @@ namespace StartFMS.Backend.API.Controllers;
 public class LoginController : Controller
 {
     private readonly ILogger<UserAuthrizeV1Controller> _logger;
-    private readonly A00_BackendContext _context;
+    private readonly StartFmsBackendContext _context;
     private readonly JwtHelpers _jwtHelpers;
     private readonly IUsers _users;
     public LoginController(
         ILogger<UserAuthrizeV1Controller> logger,
         IUsers users,
-        A00_BackendContext backendContext,
+        StartFmsBackendContext backendContext,
         JwtHelpers jwtHelpers)
     {
         _logger = logger;
@@ -39,7 +37,7 @@ public class LoginController : Controller
     [HttpPost]
     public string PostFormIdentity([FromBody] LoginPost identity)
     {
-        var user = _context.A00Accounts
+        var user = _context.UserAccounts
             .Where(item =>  item.Account == identity.Account)
             .Where(item => item.Password == identity.Password)
             .SingleOrDefault();
@@ -53,25 +51,15 @@ public class LoginController : Controller
             var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Account),
-                    new Claim("FullName", user.Name),
-                    new Claim("EmployeeId", user.EmployeeId.ToString())
+                    new Claim("FullName", user.Account),
                 };
 
-            var role = from a in _context.A00Roles
-                       where a.EmployeeId == user.EmployeeId
-                       select a;
-
-            foreach (var temp in role)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-            }
+            claims.Add(new Claim(ClaimTypes.Role, "admin"));
 
             var authProperties = new AuthenticationProperties
             {
                 // ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(2)
             };
-
-
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 

@@ -1,11 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using StartFMS.Backend.API.Interface;
-using StartFMS.Backend.Extensions;
-using StartFMS.Models.Backend;
+using StartFMS.EF;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text;
 
 namespace StartFMS.Backend.API.Entity;
@@ -13,7 +10,7 @@ namespace StartFMS.Backend.API.Entity;
 public class UserManager : IUsers
 {
     public string ErrorMessage => errorMessage;
-    
+
     //區塊變數
     private string errorMessage { get; set; } = string.Empty;
     private Guid? userId { get; set; }
@@ -22,10 +19,10 @@ public class UserManager : IUsers
     private string Audience { get; set; }
 
     //共用變數
-    private A00_BackendContext _BackendContext { get; set; }
+    private StartFmsBackendContext _BackendContext { get; set; }
     private ILogger _Logger { get; set; }
-    public UserManager(string signing, string issuer, string audience, 
-        ILogger<UserManager>? logger, A00_BackendContext context)
+    public UserManager(string signing, string issuer, string audience,
+        ILogger<UserManager>? logger, StartFmsBackendContext context)
     {
         Signing = signing;
         Issuer = issuer;
@@ -51,7 +48,7 @@ public class UserManager : IUsers
         }
         else
         {
-            var user = _BackendContext.A00Accounts
+            var user = _BackendContext.UserAccounts
                 .Where(item => item.Account == userName)
                 .Where(item => item.Password == password)
                 .SingleOrDefault();
@@ -63,7 +60,7 @@ public class UserManager : IUsers
             }
             else
             {
-                userId = user.EmployeeId;
+                userId = user.Id;
             }
         }
 
@@ -77,9 +74,9 @@ public class UserManager : IUsers
             throw new Exception("尚未登入");
         }
 
-        return _BackendContext.A00Accounts
-            .FirstOrDefault(x => x.EmployeeId == this.userId)?
-            .Name;
+        return _BackendContext.UserAccounts
+            .FirstOrDefault(x => x.Id == this.userId)?
+            .Account;
     }
 
 
@@ -91,26 +88,26 @@ public class UserManager : IUsers
         }
 
         // 使用者身分資料
-        var user = _BackendContext.A00Accounts
-            .FirstOrDefault(x => x.EmployeeId == this.userId);
+        var user = _BackendContext.UserAccounts
+            .FirstOrDefault(x => x.Id == this.userId);
 
         var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, user.Account),
-                new Claim("FullName", user.Name),
-                new Claim(JwtRegisteredClaimNames.NameId, user.EmployeeId.ToString()),
-                new Claim("EmployeeId", user.EmployeeId.ToString())
+                //new Claim(JwtRegisteredClaimNames.Email, user.Account),
+                //new Claim("FullName", user.Name),
+                //new Claim(JwtRegisteredClaimNames.NameId, user.EmployeeId.ToString()),
+                //new Claim("EmployeeId", user.EmployeeId.ToString())
             };
 
         //腳色
-        var role = from a in _BackendContext.A00Roles
-                   where a.EmployeeId == user.EmployeeId
-                   select a;
+        //var role = from a in _BackendContext.A00Roles
+        //           where a.EmployeeId == user.EmployeeId
+        //           select a;
 
-        foreach (var temp in role)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-        }
+        //foreach (var temp in role)
+        //{
+        //    claims.Add(new Claim(ClaimTypes.Role, temp.Name));
+        //}
 
         return GenerateToken(claims);
     }
