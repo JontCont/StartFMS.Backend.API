@@ -10,13 +10,9 @@ namespace StartFMS.Backend.Extensions;
 
 public class JwtHelpers
 {
-    private readonly IConfiguration Configuration;
-
-    public JwtHelpers()
-    {
-        this.Configuration = Config.GetConfiguration();
-    }
-
+    public string Issuer { get;set; }
+    public string Signing { get;set; }
+    public string Audience { get;set; }
     /// <summary>
     /// 單一使用者名稱登入。
     /// </summary>
@@ -25,14 +21,11 @@ public class JwtHelpers
     /// <returns></returns>
     public string GenerateToken(string userName, int expireMinutes = 30)
     {
-        var issuer = Configuration.GetValue<string>("JwtSettings:Issuer");
-        var signKey = Configuration.GetValue<string>("JwtSettings:SignKey");
-
         // Configuring "Claims" to your JWT Token
         var claims = new List<Claim>();
 
         // In RFC 7519 (Section#4), there are defined 7 built-in Claims, but we mostly use 2 of them.
-        //claims.Add(new Claim(JwtRegisteredClaimNames.Iss, issuer));
+        //claims.Add(new Claim(JwtRegisteredClaimNames.Iss, Issuer));
         claims.Add(new Claim(JwtRegisteredClaimNames.Sub, userName)); // User.Identity.Name
         //claims.Add(new Claim(JwtRegisteredClaimNames.Aud, "The Audience"));
         //claims.Add(new Claim(JwtRegisteredClaimNames.Exp, DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds().ToString()));
@@ -47,12 +40,12 @@ public class JwtHelpers
         //claims.Add(new Claim(ClaimTypes.Name, userName));
 
         // TODO: You can define your "roles" to your Claims.
-        claims.Add(new Claim("roles", "Users"));
+        //claims.Add(new Claim("roles", "Users"));
 
         var userClaimsIdentity = new ClaimsIdentity(claims);
 
         // Create a SymmetricSecurityKey for JWT Token signatures
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Signing));
 
         // HmacSha256 MUST be larger than 128 bits, so the key can't be too short. At least 16 and more characters.
         // https://stackoverflow.com/questions/47279947/idx10603-the-algorithm-hs256-requires-the-securitykey-keysize-to-be-greater
@@ -61,11 +54,11 @@ public class JwtHelpers
         // Create SecurityTokenDescriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Issuer = issuer,
-            //Audience = issuer, // Sometimes you don't have to define Audience.
+            Issuer = Issuer,
+            //Audience = Issuer, // Sometimes you don't have to define Audience.
             //NotBefore = DateTime.Now, // Default is DateTime.Now
             //IssuedAt = DateTime.Now, // Default is DateTime.Now
-            Subject = userClaimsIdentity,
+            //signingCredentials = userClaimsIdentity,
             Expires = DateTime.Now.AddMinutes(expireMinutes),
             SigningCredentials = signingCredentials,
         };
@@ -86,13 +79,10 @@ public class JwtHelpers
     /// <returns></returns>
     public string GenerateToken(IdentityUsers userAutos, int expireMinutes = 30)
     {
-        var issuer = Configuration.GetValue<string>("JwtSettings:Issuer");
-        var signKey = Configuration.GetValue<string>("JwtSettings:SignKey");
-
         // Configuring "Claims" to your JWT Token
         var claims = new List<Claim>() {
             // In RFC 7519 (Section#4), there are defined 7 built-in Claims, but we mostly use 2 of them.
-            //new Claim(JwtRegisteredClaimNames.Iss, issuer),
+            //new Claim(JwtRegisteredClaimNames.Iss, Issuer),
             new Claim(JwtRegisteredClaimNames.Sub, userAutos.Users),// User.Identity.Name
             //new Claim(JwtRegisteredClaimNames.Aud, "The Audience"),
             //new Claim(JwtRegisteredClaimNames.Exp, DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds().ToString()),
@@ -115,7 +105,7 @@ public class JwtHelpers
         var userClaimsIdentity = new ClaimsIdentity(claims);
 
         // Create a SymmetricSecurityKey for JWT Token signatures
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Signing));
 
         // HmacSha256 MUST be larger than 128 bits, so the key can't be too short. At least 16 and more characters.
         // https://stackoverflow.com/questions/47279947/idx10603-the-algorithm-hs256-requires-the-securitykey-keysize-to-be-greater
@@ -124,11 +114,11 @@ public class JwtHelpers
         // Create SecurityTokenDescriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Issuer = issuer,
-            // Audience = issuer, // Sometimes you don't have to define Audience.
+            Issuer = Issuer,
+            // Audience = Issuer, // Sometimes you don't have to define Audience.
             // NotBefore = DateTime.Now, // Default is DateTime.Now
             // IssuedAt = DateTime.Now, // Default is DateTime.Now
-            Subject = userClaimsIdentity,
+            // Signing = userClaimsIdentity,
             Expires = DateTime.Now.AddMinutes(expireMinutes),
             SigningCredentials = signingCredentials
         };
@@ -140,6 +130,44 @@ public class JwtHelpers
 
         return serializeToken;
     }
+
+    /// <summary>
+    /// 從 BDP080 取得資料登入 
+    /// </summary>
+    /// <param name="userAutos">使用者驗證</param>
+    /// <param name="expireMinutes">時效</param>
+    /// <returns></returns>
+    public string GenerateToken(List<Claim> claims, int expireMinutes = 30)
+    {
+        var userClaimsIdentity = new ClaimsIdentity(claims);
+
+        // Create a SymmetricSecurityKey for JWT Token signatures
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Signing));
+
+        // HmacSha256 MUST be larger than 128 bits, so the key can't be too short. At least 16 and more characters.
+        // https://stackoverflow.com/questions/47279947/idx10603-the-algorithm-hs256-requires-the-securitykey-keysize-to-be-greater
+        var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+
+        // Create SecurityTokenDescriptor
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Issuer = Issuer,
+            // Audience = Issuer, // Sometimes you don't have to define Audience.
+            // NotBefore = DateTime.Now, // Default is DateTime.Now
+            // IssuedAt = DateTime.Now, // Default is DateTime.Now
+            // Signing = userClaimsIdentity,
+            Expires = DateTime.Now.AddMinutes(expireMinutes),
+            SigningCredentials = signingCredentials
+        };
+
+        // Generate a JWT securityToken, than get the serialized Token result (string)
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+        var serializeToken = tokenHandler.WriteToken(securityToken);
+
+        return serializeToken;
+    }
+
 
     //------------------------
 

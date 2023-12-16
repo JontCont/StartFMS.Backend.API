@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartFMS.Models", "StartFMS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartFMS.Backend.API", "StartFMS.Backend.API\StartFMS.Backend.API.csproj", "{52139911-E860-4D3D-B6B2-EAA0C192F367}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2E0FF721-0F25-415E-BF01-E2A536D94624}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiService", "ApiService", "{7E64B5F2-1C55-48FE-854A-DBA827DF4905}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +28,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{87797B7D-FD20-44AA-B832-C2EB5BA5F6F6} = {2E0FF721-0F25-415E-BF01-E2A536D94624}
+		{52139911-E860-4D3D-B6B2-EAA0C192F367} = {7E64B5F2-1C55-48FE-854A-DBA827DF4905}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {78CF27FF-480E-4A61-BFDF-F26E23579625}
