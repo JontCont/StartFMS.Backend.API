@@ -91,6 +91,7 @@ internal class UsersAuthorize {
     /// </summary>
     /// <param name="pSql">SQL</param>
     /// <param name="pSqlParams">自定義 Object</param>
+    /// <param name="Connection"></param>
     /// <returns></returns>
     public DataTable GetDataTable(string pSql, object pSqlParams, string Connection = "") {
         DataTable datatable = new DataTable();
