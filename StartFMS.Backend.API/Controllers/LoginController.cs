@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StartFMS.Backend.API.Controllers.Users;
 using StartFMS.Backend.API.Dtos;
-using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
+using StartFMS.Entity;
 using System.Security.Claims;
 
 namespace StartFMS.Backend.API.Controllers;

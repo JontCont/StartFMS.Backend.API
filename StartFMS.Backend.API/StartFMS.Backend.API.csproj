@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StartFMS.EF\StartFMS.EF.csproj" />
+    <ProjectReference Include="..\StartFMS.Entity\StartFMS.Entity.csproj" />
     <ProjectReference Include="..\StartFMS.Models\StartFMS.Models.csproj" />
   </ItemGroup>
 
@@ -40,10 +41,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Interface\" />
   </ItemGroup>
 
 </Project>

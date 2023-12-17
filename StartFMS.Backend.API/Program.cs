@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using StartFMS.Backend.API.Entity;
 using StartFMS.Backend.API.Filters;
-using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
+using StartFMS.Entity;
 using StartFMS.Extensions.Configuration;
 using System.Text.Json.Serialization;
 
@@ -64,9 +63,9 @@ builder.Services.AddScoped<IUsers>(provider =>
     var issuer = config.GetValue<string>("JwtSettings:Issuer");
     var audience = config.GetValue<string>("JwtSettings:Audience");
 
-    return ActivatorUtilities.CreateInstance<UserManager>(provider, signing, issuer, audience,
+    return ActivatorUtilities.CreateInstance<Users>(provider, signing, issuer, audience,
                                                           provider.GetRequiredService<StartFmsBackendContext>(),
-                                                          provider.GetRequiredService<ILogger<UserManager>>());
+                                                          provider.GetRequiredService<ILogger<Users>>());
 });
 
 builder.Services.AddSwaggerGen(c =>
