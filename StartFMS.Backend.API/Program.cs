@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using StartFMS.Backend.API.Extensions;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
@@ -57,17 +58,14 @@ builder.Services.AddDbContext<StartFmsBackendContext>(content =>
 });
 
 // 使用 ActivatorUtilities.CreateInstance 提供設定值並註冊 UserManager
-builder.Services.AddScoped<IUsers>(provider =>
-{
-    // 在這裡從組態文件中取得相關的設定值
-    var signing = config.GetValue<string>("JwtSettings:KEY");
-    var issuer = config.GetValue<string>("JwtSettings:Issuer");
-    var audience = config.GetValue<string>("JwtSettings:Audience");
+// 在這裡從組態文件中取得相關的設定值
+var signing = config.GetValue<string>("JwtSettings:KEY");
+var issuer = config.GetValue<string>("JwtSettings:Issuer");
+var audience = config.GetValue<string>("JwtSettings:Audience");
+builder.Services.AddScopedForInterface<IUsers, Users>(signing, issuer, audience);
+builder.Services.AddScopedForInterface<IUserRole, StartFMS.Entity.UserRole>();
 
-    return ActivatorUtilities.CreateInstance<Users>(provider, signing, issuer, audience,
-                                                          provider.GetRequiredService<StartFmsBackendContext>(),
-                                                          provider.GetRequiredService<ILogger<Users>>());
-});
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -123,7 +121,6 @@ JwtHelpers jwtHelpers = new JwtHelpers()
 };
 builder.Services.AddSingleton(jwtHelpers);
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -140,3 +137,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
