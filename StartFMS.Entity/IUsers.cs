@@ -30,6 +30,13 @@ namespace StartFMS.Entity
         /// </summary>
         /// <returns></returns>
         string? GetUserName();
+
+        /// <summary>
+        /// 取得使用者角色
+        /// </summary>
+        /// <returns></returns>
+        string? GetUserRole();
+
     }
 
     public class Users : IUsers
@@ -39,6 +46,7 @@ namespace StartFMS.Entity
         //區塊變數
         private string errorMessage { get; set; } = string.Empty;
         private Guid? userId { get; set; }
+        private Guid? userRoleId { get; set; }
         private string Signing { get; set; }
         private string Issuer { get; set; }
         private string Audience { get; set; }
@@ -86,6 +94,7 @@ namespace StartFMS.Entity
                 else
                 {
                     userId = user.Id;
+                    userRoleId = user.UserRoleId;
                 }
             }
 
@@ -102,6 +111,13 @@ namespace StartFMS.Entity
             return _BackendContext.UserAccounts
                 .FirstOrDefault(x => x.Id == this.userId)?
                 .Account;
+        }
+
+        public string? GetUserRole()
+        {
+            return  _BackendContext.UserRoles
+                .FirstOrDefault(x => x.Id == this.userRoleId)?
+                .Name;
         }
 
 

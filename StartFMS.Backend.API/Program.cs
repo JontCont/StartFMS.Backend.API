@@ -5,6 +5,7 @@ using StartFMS.Backend.Extensions;
 using StartFMS.EF;
 using StartFMS.Entity;
 using StartFMS.Extensions.Configuration;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +76,11 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Start Five Minutes Backend API",
         Version = "v1"
     });
+
+    // 讀取 XML 檔案產生 API 說明
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
