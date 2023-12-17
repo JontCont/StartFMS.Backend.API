@@ -93,22 +93,13 @@ public class UserManager : IUsers
 
         var claims = new List<Claim>
             {
-                //new Claim(JwtRegisteredClaimNames.Email, user.Account),
-                //new Claim("FullName", user.Name),
-                //new Claim(JwtRegisteredClaimNames.NameId, user.EmployeeId.ToString()),
-                //new Claim("EmployeeId", user.EmployeeId.ToString())
+                new Claim(JwtRegisteredClaimNames.Email, user.Account),
+                new Claim("FullName", user.Name),
+                new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
             };
 
         //腳色
-        //var role = from a in _BackendContext.A00Roles
-        //           where a.EmployeeId == user.EmployeeId
-        //           select a;
-
-        //foreach (var temp in role)
-        //{
-        //    claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-        //}
-
+        claims.Add(new Claim(ClaimTypes.Role, "admin"));
         return GenerateToken(claims);
     }
 
@@ -141,8 +132,8 @@ public class UserManager : IUsers
         {
             Issuer = Issuer,
             Audience = Audience, // Sometimes you don't have to define Audience.
-            // NotBefore = DateTime.Now, // Default is DateTime.Now
-            // IssuedAt = DateTime.Now, // Default is DateTime.Now
+            NotBefore = DateTime.Now, // Default is DateTime.Now
+            IssuedAt = DateTime.Now, // Default is DateTime.Now
             Subject = userClaimsIdentity,
             Expires = DateTime.Now.AddMinutes(expireMinutes),
             SigningCredentials = signingCredentials

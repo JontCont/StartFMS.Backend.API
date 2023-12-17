@@ -11,7 +11,6 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders().AddConsole();
 var config = Config.GetConfiguration<Program>(); //加入設定檔
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -105,6 +104,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+/// <summary>
+/// Initializes a new instance of the JwtHelpers class with the specified signing key, issuer, and audience.
+/// </summary>
+/// <param name="signing">The signing key used to sign the JWT.</param>
+/// <param name="issuer">The issuer of the JWT.</param>
+/// <param name="audience">The audience of the JWT.</param>
 JwtHelpers jwtHelpers = new JwtHelpers()
 {
     Signing = config.GetValue<string>("JwtSettings:KEY") ?? "",
