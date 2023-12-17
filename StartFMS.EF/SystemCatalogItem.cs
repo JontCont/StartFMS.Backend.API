@@ -39,4 +39,7 @@ public partial class SystemCatalogItem
     /// 父層ID (目前設為 Id)
     /// </summary>
     public int? ParentId { get; set; }
+
+    public ICollection<SystemCatalogItem>? Children { get; set; }
+    public SystemCatalogItem? Parent { get; set; }
 }
