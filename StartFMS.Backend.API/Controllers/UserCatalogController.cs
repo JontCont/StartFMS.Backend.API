@@ -13,7 +13,7 @@ namespace StartFMS.Backend.API.Controllers;
 
 [AllowAnonymous]
 [ApiController]
-[Route("api/user/menu")]
+[Route("api/users/")]
 public class UserCatalogController : Controller
 {
     private readonly ILogger<UserCatalogController> _logger;
@@ -34,8 +34,8 @@ public class UserCatalogController : Controller
         _context = backendContext;
     }
 
-    [HttpGet("role")]
-    public string GetRoleAll()
+    [HttpGet("menus")]
+    public string GetUserMenus()
     {
         var menuItems = _context.SystemCatalogItems
        .OrderBy(m => m.DisplayOrder) // 依照 DisplayOrder 排序
