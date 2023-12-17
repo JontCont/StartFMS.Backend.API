@@ -41,6 +41,10 @@ public partial class StartFmsBackendContext : DbContext
                 .HasMaxLength(50)
                 .HasDefaultValue("")
                 .HasComment("Icon");
+            entity.Property(e => e.ImportAt)
+                .HasMaxLength(255)
+                .HasDefaultValue("");
+            entity.Property(e => e.IsGroup).HasDefaultValue(false);
             entity.Property(e => e.MenuName)
                 .HasMaxLength(30)
                 .HasComment("目錄名稱");

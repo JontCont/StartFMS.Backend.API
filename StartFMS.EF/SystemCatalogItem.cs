@@ -40,6 +40,10 @@ public partial class SystemCatalogItem
     /// </summary>
     public int? ParentId { get; set; }
 
+    public bool? IsGroup { get; set; }
+
+    public string? ImportAt { get; set; }
+
     public ICollection<SystemCatalogItem>? Children { get; set; }
     public SystemCatalogItem? Parent { get; set; }
 }
