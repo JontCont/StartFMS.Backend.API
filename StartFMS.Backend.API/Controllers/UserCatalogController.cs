@@ -34,6 +34,19 @@ public class UserCatalogController : Controller
         _context = backendContext;
     }
 
+    [HttpGet("menus/items")]
+    public string GetMenusItems()
+    {
+        return JsonConvert.SerializeObject(_context.SystemCatalogItems.Where(x => x.ImportAt != null).ToList(), new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Formatting = Formatting.Indented,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            MaxDepth = 128,
+        });
+    }
+
     [HttpGet("menus")]
     public string GetUserMenus()
     {
