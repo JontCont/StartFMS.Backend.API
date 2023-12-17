@@ -15,18 +15,19 @@ public partial class StartFmsBackendContext : DbContext
     {
     }
 
-    public virtual DbSet<SystemCatalogItems> SystemCatalogItems { get; set; }
+    public virtual DbSet<SystemCatalogItem> SystemCatalogItems { get; set; }
 
-    public virtual DbSet<UserAccounts> UserAccounts { get; set; }
+    public virtual DbSet<UserAccount> UserAccounts { get; set; }
 
-    public virtual DbSet<UserRole> UserRole { get; set; }
+    public virtual DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=DESKTOP-H1PC\\SQLEXPRESS;Database=StartFMS_Backend;Trusted_Connection=False;user id=sa;password=root;Encrypt=true;TrustServerCertificate=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SystemCatalogItems>(entity =>
+        modelBuilder.Entity<SystemCatalogItem>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasComment("目錄識別碼")
@@ -50,7 +51,7 @@ public partial class StartFmsBackendContext : DbContext
                 .HasComment("網址..");
         });
 
-        modelBuilder.Entity<UserAccounts>(entity =>
+        modelBuilder.Entity<UserAccount>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("(newid())")
@@ -59,9 +60,13 @@ public partial class StartFmsBackendContext : DbContext
             entity.Property(e => e.Account)
                 .HasMaxLength(50)
                 .HasComment("帳號");
+            entity.Property(e => e.Email).HasMaxLength(50);
             entity.Property(e => e.IsEnabled)
                 .HasDefaultValue(true)
                 .HasComment("是否啟用");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .UseCollation("SQL_Latin1_General_CP1_CI_AS");
             entity.Property(e => e.Password)
                 .HasMaxLength(50)
                 .HasComment("密碼");
@@ -72,6 +77,8 @@ public partial class StartFmsBackendContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
+            entity.ToTable("UserRole");
+
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("(newid())")
                 .HasComment("識別碼")

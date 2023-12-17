@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StartFMS.EF;
 
@@ -11,9 +12,11 @@ using StartFMS.EF;
 namespace StartFMS.EF.Migrations
 {
     [DbContext(typeof(StartFmsBackendContext))]
-    partial class StartFmsBackendContextModelSnapshot : ModelSnapshot
+    [Migration("20231217022434_UpdateUserAccount")]
+    partial class UpdateUserAccount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
