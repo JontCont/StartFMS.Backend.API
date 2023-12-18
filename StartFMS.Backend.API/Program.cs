@@ -37,15 +37,19 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers(services =>
 {
+    services.Filters.Add(typeof(ApiResultFilter));
     services.Filters.Add(typeof(AuthorizationFilter));
     services.Filters.Add(typeof(LogActionFilters));
     services.Filters.Add(typeof(LogExceptionFilter));
 });
 
+//builder.Services.AddNe
+
+
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
+        //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
     });
 
 

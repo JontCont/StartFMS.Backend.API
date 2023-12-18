@@ -37,27 +37,15 @@ public class UserRoleController : Controller
     }
 
     [HttpGet("role")]
-    public string GetRoleAll()
+    public IEnumerable<EF.UserRole>? GetRoleAll()
     {
-        var role = _roles.GetRoleAll();
-
-        return JsonConvert.SerializeObject(new
-        {
-            success = true,
-            role = role,
-        });
+        return _roles.GetRoleAll();      
     }
 
     [HttpGet("role/{id}")]
-    public string GetRole(Guid? id)
+    public EF.UserRole? GetRole(Guid? id)
     {
-        var role = _roles.GetRole(id);
-
-        return JsonConvert.SerializeObject(new
-        {
-            success = true,
-            role = role,
-        });
+        return _roles.GetRole(id);
     }   
 
 

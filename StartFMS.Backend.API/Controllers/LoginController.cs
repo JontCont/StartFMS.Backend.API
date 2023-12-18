@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Azure;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
 using StartFMS.Entity;
+using System.Net;
 
 namespace StartFMS.Backend.API.Controllers;
 
@@ -46,29 +48,28 @@ public class LoginController : Controller
     /// <returns>包含登入結果的 JSON 回應。</returns>
     /// <remarks>包含登入結果的 JSON 回應。</remarks>
     [HttpPost]
-    public string jwtLogin(LoginPost value)
+    public IActionResult jwtLogin(LoginPost value)
     {
-        if (!_users.Login(value.Account, value.Password)) {
+        if (!_users.Login(value.Account, value.Password))
+        {
             var msg = _users.ErrorMessage;
-
-            return JsonConvert.SerializeObject(new
+            return Unauthorized(new RetrunJson
             {
-                success = false,
-                message = msg,
+                Data = null,
+                HttpCode = (int)HttpStatusCode.Unauthorized,
+                ErrorMessage = msg
             });
         }
 
         var userName = _users.GetUserName();
         var token = _users.GetAuthrizeToken();
 
-        return JsonConvert.SerializeObject(new
+        return Ok(new
         {
-            success = true,
-            token = token,
-            user = userName,
+            UserName = userName,
+            Token = token
         });
     }
-
     /// <summary>
     /// 處理登出請求。
     /// </summary>
