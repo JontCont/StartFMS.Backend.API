@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
 using StartFMS.Backend.API.Extensions;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.Extensions;
@@ -8,6 +10,7 @@ using StartFMS.Entity;
 using StartFMS.Extensions.Configuration;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders().AddConsole();
@@ -49,9 +52,12 @@ builder.Services.AddControllers(services =>
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
-        //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
+        options.JsonSerializerOptions.MaxDepth = 128;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.WriteIndented = true;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.IgnoreNullValues = true;
     });
-
 
 builder.Services.AddDbContext<StartFmsBackendContext>(content =>
 {

@@ -13,7 +13,7 @@ namespace StartFMS.Backend.API.Controllers;
 
 [AllowAnonymous]
 [ApiController]
-[Route("api/users/")]
+[Route("api/users/menus/")]
 public class UserCatalogController : Controller
 {
     private readonly ILogger<UserCatalogController> _logger;
@@ -34,21 +34,15 @@ public class UserCatalogController : Controller
         _context = backendContext;
     }
 
-    [HttpGet("menus/items")]
-    public string GetMenusItems()
+    [HttpGet("items")]
+    public IEnumerable<SystemCatalogItem>? GetMenusItems()
     {
-        return JsonConvert.SerializeObject(_context.SystemCatalogItems.Where(x => x.ImportAt != null).ToList(), new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Formatting = Formatting.Indented,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            NullValueHandling = NullValueHandling.Ignore,
-            MaxDepth = 128,
-        });
+        var res = _context.SystemCatalogItems.Where(x => x.ImportAt != null).ToList();
+        return res;
     }
 
-    [HttpGet("menus")]
-    public string GetUserMenus()
+    [HttpGet]
+    public IEnumerable<SystemCatalogItem> GetUserMenus()
     {
         var menuItems = _context.SystemCatalogItems
        .OrderBy(m => m.DisplayOrder) // 依照 DisplayOrder 排序
@@ -65,17 +59,7 @@ public class UserCatalogController : Controller
                 .OrderBy(m => m.DisplayOrder) // 依照 DisplayOrder 排序
                 .ToList();
         }
-
-        var json = JsonConvert.SerializeObject(rootItems, new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Formatting = Formatting.Indented,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            NullValueHandling = NullValueHandling.Ignore,
-            MaxDepth = 128,
-        });
-
-        return json;
+        return rootItems.ToList();
     }
 
 }
