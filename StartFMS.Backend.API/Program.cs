@@ -1,26 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using StartFMS.Backend.API.Entity;
+using StartFMS.Backend.API.Extensions;
 using StartFMS.Backend.API.Filters;
-using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
+using StartFMS.EF;
+using StartFMS.Entity;
 using StartFMS.Extensions.Configuration;
-using StartFMS.Models.Backend;
-using Newtonsoft.Json;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.ConfigureLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole();
-    //logging.AddFile("app.log");
-});
+builder.Logging.ClearProviders().AddConsole();
 var config = Config.GetConfiguration<Program>(); //加入設定檔
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -44,37 +37,39 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers(services =>
 {
+    services.Filters.Add(typeof(ApiResultFilter));
     services.Filters.Add(typeof(AuthorizationFilter));
     services.Filters.Add(typeof(LogActionFilters));
     services.Filters.Add(typeof(LogExceptionFilter));
 });
 
+//builder.Services.AddNe
+
+
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
+        //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; // 添加這一行
     });
 
 
-builder.Services.AddDbContext<A00_BackendContext>(content =>
+builder.Services.AddDbContext<StartFmsBackendContext>(content =>
 {
-    content.UseSqlServer(config.GetConnectionString("Develop"), b => {
+    content.UseSqlServer(config.GetConnectionString("Develop"), b =>
+    {
         b.MigrationsAssembly("StartFMS.Backend.API");
     });
 });
 
 // 使用 ActivatorUtilities.CreateInstance 提供設定值並註冊 UserManager
-builder.Services.AddScoped<IUsers>(provider =>
-{
-    // 在這裡從組態文件中取得相關的設定值
-    var signing = config.GetValue<string>("JwtSettings:KEY");
-    var issuer = config.GetValue<string>("JwtSettings:Issuer");
-    var audience = config.GetValue<string>("JwtSettings:Audience");
+// 在這裡從組態文件中取得相關的設定值
+var signing = config.GetValue<string>("JwtSettings:KEY");
+var issuer = config.GetValue<string>("JwtSettings:Issuer");
+var audience = config.GetValue<string>("JwtSettings:Audience");
+builder.Services.AddScopedForInterface<IUsers, Users>(signing, issuer, audience);
+builder.Services.AddScopedForInterface<IUserRole, StartFMS.Entity.UserRole>();
 
-    return ActivatorUtilities.CreateInstance<UserManager>(provider, signing, issuer, audience,
-                                                          provider.GetRequiredService<A00_BackendContext>(),
-                                                          provider.GetRequiredService<ILogger<UserManager>>());
-});
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -83,6 +78,11 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Start Five Minutes Backend API",
         Version = "v1"
     });
+
+    // 讀取 XML 檔案產生 API 說明
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -113,12 +113,11 @@ builder.Services.AddSwaggerGen(c =>
 
 JwtHelpers jwtHelpers = new JwtHelpers()
 {
-    Signing = config.GetValue<string>("JwtSettings:KEY"),
-    Issuer = config.GetValue<string>("JwtSettings:Issuer"),
-    Audience = config.GetValue<string>("JwtSettings:Audience"),
+    Signing = config.GetValue<string>("JwtSettings:KEY") ?? "",
+    Issuer = config.GetValue<string>("JwtSettings:Issuer") ?? "",
+    Audience = config.GetValue<string>("JwtSettings:Audience") ?? "",
 };
 builder.Services.AddSingleton(jwtHelpers);
-
 
 var app = builder.Build();
 
@@ -136,3 +135,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

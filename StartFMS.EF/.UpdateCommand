@@ -1,0 +1,7 @@
+# 1. Update database in EF Core
+dotnet ef dbcontext scaffold "Server=DESKTOP-H1PC\SQLEXPRESS;Database=StartFMS_Backend;Trusted_Connection=False;user id=sa;password=root;Encrypt=true;TrustServerCertificate=true;" Microsoft.EntityFrameworkCore.SqlServer -f -v
+
+# 2. Update database
+dotnet ef migrations add CommitDb
+
+

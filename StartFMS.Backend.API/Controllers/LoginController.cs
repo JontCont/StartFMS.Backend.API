@@ -1,32 +1,38 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Azure;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using StartFMS.Backend.API.Controllers.Users;
 using StartFMS.Backend.API.Dtos;
-using StartFMS.Backend.API.Interface;
 using StartFMS.Backend.Extensions;
-using StartFMS.Models.Backend;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using StartFMS.EF;
+using StartFMS.Entity;
+using System.Net;
 
 namespace StartFMS.Backend.API.Controllers;
 
 [AllowAnonymous]
 [ApiController]
-[Route("api/auth/v1.0/Login/")]
+[Route("api/auth/Login/")]
 public class LoginController : Controller
 {
-    private readonly ILogger<UserAuthrizeV1Controller> _logger;
-    private readonly A00_BackendContext _context;
+    private readonly ILogger<LoginController> _logger;
+    private readonly StartFmsBackendContext _context;
     private readonly JwtHelpers _jwtHelpers;
     private readonly IUsers _users;
+
+    /// <summary>
+    /// 初始化 <see cref="LoginController"/> 類別的新執行個體。
+    /// </summary>
+    /// <param name="logger">日誌記錄器。</param>
+    /// <param name="users">使用者服務。</param>
+    /// <param name="backendContext">後端內容。</param>
+    /// <param name="jwtHelpers">JWT 輔助工具。</param>
     public LoginController(
-        ILogger<UserAuthrizeV1Controller> logger,
+        ILogger<LoginController> logger,
         IUsers users,
-        A00_BackendContext backendContext,
+        StartFmsBackendContext backendContext,
         JwtHelpers jwtHelpers)
     {
         _logger = logger;
@@ -35,93 +41,69 @@ public class LoginController : Controller
         _jwtHelpers = jwtHelpers;
     }
 
-
+    /// <summary>
+    /// 處理 JWT 登入請求。
+    /// </summary>
+    /// <param name="value">登入的 POST 資料。</param>
+    /// <returns>包含登入結果的 JSON 回應。</returns>
+    /// <remarks>包含登入結果的 JSON 回應。</remarks>
     [HttpPost]
-    public string PostFormIdentity([FromBody] LoginPost identity)
+    public IActionResult jwtLogin(LoginPost value)
     {
-        var user = _context.A00Accounts
-            .Where(item =>  item.Account == identity.Account)
-            .Where(item => item.Password == identity.Password)
-            .SingleOrDefault();
-
-        if (user == null)
+        if (!_users.Login(value.Account, value.Password))
         {
-            return "帳號密碼錯誤";
-        }
-        else
-        {
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Account),
-                    new Claim("FullName", user.Name),
-                    new Claim("EmployeeId", user.EmployeeId.ToString())
-                };
-
-            var role = from a in _context.A00Roles
-                       where a.EmployeeId == user.EmployeeId
-                       select a;
-
-            foreach (var temp in role)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-            }
-
-            var authProperties = new AuthenticationProperties
-            {
-                // ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(2)
-            };
-
-
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-            return "ok";
-        }
-    }//PostFormIdentity()
-
-    [HttpPost("jwtLogin")]
-    public string jwtLogin(LoginPost value)
-    {
-        if (!_users.Login(value.Account, value.Password)) {
             var msg = _users.ErrorMessage;
-
-            return JsonConvert.SerializeObject(new
+            return Unauthorized(new RetrunJson
             {
-                success = false,
-                message = msg,
+                Data = null,
+                HttpCode = (int)HttpStatusCode.Unauthorized,
+                ErrorMessage = msg
             });
         }
 
         var userName = _users.GetUserName();
         var token = _users.GetAuthrizeToken();
 
-        return JsonConvert.SerializeObject(new
+        return Ok(new
         {
-            success = true,
-            token = token,
-            user = userName,
+            UserName = userName,
+            Token = token
         });
     }
-
+    /// <summary>
+    /// 處理登出請求。
+    /// </summary>
     [HttpDelete]
     public void logout()
     {
         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
+    /// <summary>
+    /// 處理 "NoLogin" 請求。
+    /// </summary>
+    /// <returns>回應訊息，指示使用者未登入。</returns>
     [HttpGet("NoLogin")]
     public string noLogin()
     {
         return "未登入";
     }
 
+    /// <summary>
+    /// 處理 "NoAccess" 請求。
+    /// </summary>
+    /// <returns>回應訊息，指示使用者無權限。</returns>
     [HttpGet("NoAccess")]
     public string noAccess()
     {
         return "沒有權限";
     }
 
+    /// <summary>
+    /// 檢查給定的電子郵件地址是否有效。
+    /// </summary>
+    /// <param name="email">要驗證的電子郵件地址。</param>
+    /// <returns>如果電子郵件地址有效則為 true，否則為 false。</returns>
     static bool IsValidEmail(string email)
     {
         try
