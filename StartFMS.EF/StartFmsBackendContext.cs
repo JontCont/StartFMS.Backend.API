@@ -17,6 +17,8 @@ public partial class StartFmsBackendContext : DbContext
 
     public virtual DbSet<SystemCatalogItem> SystemCatalogItems { get; set; }
 
+    public virtual DbSet<SystemParameter> SystemParameters { get; set; }
+
     public virtual DbSet<UserAccount> UserAccounts { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
@@ -41,9 +43,7 @@ public partial class StartFmsBackendContext : DbContext
                 .HasMaxLength(50)
                 .HasDefaultValue("")
                 .HasComment("Icon");
-            entity.Property(e => e.ImportAt)
-                .HasMaxLength(255)
-                .HasDefaultValue("");
+            entity.Property(e => e.ImportAt).HasMaxLength(255);
             entity.Property(e => e.IsGroup).HasDefaultValue(false);
             entity.Property(e => e.MenuName)
                 .HasMaxLength(30)
@@ -53,6 +53,32 @@ public partial class StartFmsBackendContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValue("")
                 .HasComment("網址..");
+        });
+
+        modelBuilder.Entity<SystemParameter>(entity =>
+        {
+            entity.ToTable("SystemParameter");
+
+            entity.Property(e => e.Id).HasComment("識別碼");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("名稱");
+            entity.Property(e => e.Value1)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("參數1");
+            entity.Property(e => e.Value2)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("參數2");
+            entity.Property(e => e.Value3)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("參數3");
         });
 
         modelBuilder.Entity<UserAccount>(entity =>
