@@ -86,10 +86,10 @@ public class SystemParametersController : Controller
         });
     }
 
-    [HttpDelete]
-    public IActionResult DeleteSystemParameter(SystemParameter? value)
+    [HttpDelete("{id}")]
+    public IActionResult DeleteSystemParameter(int id)
     {
-        if (value == null)
+        if (id <= 0)
         {
             return BadRequest(new RetrunJson
             {
@@ -99,7 +99,12 @@ public class SystemParametersController : Controller
             });
         }
 
-        _systems.DeleteSystemParameters(value.Id);
-        return Ok();
+        _systems.DeleteSystemParameters(id);
+        return Ok(new RetrunJson
+        {
+            Data = null,
+            HttpCode = (int)HttpStatusCode.OK,
+            ErrorMessage = null
+        });
     }
 }
