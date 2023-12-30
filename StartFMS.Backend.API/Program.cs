@@ -56,7 +56,6 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.WriteIndented = true;
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.IgnoreNullValues = true;
     });
 
 builder.Services.AddDbContext<StartFmsBackendContext>(content =>
@@ -73,7 +72,8 @@ var signing = config.GetValue<string>("JwtSettings:KEY");
 var issuer = config.GetValue<string>("JwtSettings:Issuer");
 var audience = config.GetValue<string>("JwtSettings:Audience");
 builder.Services.AddScopedForInterface<IUsers, Users>(signing, issuer, audience);
-builder.Services.AddScopedForInterface<IUserRole, StartFMS.Entity.UserRole>();
+builder.Services.AddScopedForInterface<IUserRole, UserRoles>();
+builder.Services.AddScopedForInterface<ISystemManagement, SystemParameters>();
 
 
 
