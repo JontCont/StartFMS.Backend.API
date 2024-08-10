@@ -14,7 +14,12 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders().AddConsole();
-var config = Config.GetConfiguration<Program>(); //加入設定檔
+
+var config = builder.Configuration
+    .AddJsonFile(path: $"appsettings.{builder.Environment.EnvironmentName}.json")
+    .Build(); //加入設定檔
+
+var test = config.GetConnectionString("Develop");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
