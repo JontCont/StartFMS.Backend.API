@@ -8,13 +8,14 @@ using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
 using StartFMS.Entity;
+using StartFMS.Models;
 using System.Net;
 
 namespace StartFMS.Backend.API.Controllers;
 
 [AllowAnonymous]
 [ApiController]
-[Route("api/auth/Login/")]
+[Route("api/auth")]
 public class LoginController : Controller
 {
     private readonly ILogger<LoginController> _logger;
@@ -47,7 +48,7 @@ public class LoginController : Controller
     /// <param name="value">登入的 POST 資料。</param>
     /// <returns>包含登入結果的 JSON 回應。</returns>
     /// <remarks>包含登入結果的 JSON 回應。</remarks>
-    [HttpPost]
+    [HttpPost("Login")]
     public IActionResult jwtLogin(LoginPost value)
     {
         if (!_users.Login(value.Account, value.Password))
@@ -70,15 +71,46 @@ public class LoginController : Controller
             Token = token
         });
     }
+
     /// <summary>
     /// 處理登出請求。
     /// </summary>
-    [HttpDelete]
+    [HttpDelete("Login")]
     public void logout()
     {
         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
+    [HttpPost("SignUp")]
+    public IActionResult CreateUsers(UserRegistration models)
+    {
+        if (string.IsNullOrEmpty(models.Account) || string.IsNullOrEmpty(models.Password))
+        {
+            return BadRequest(new RetrunJson
+            {
+                Data = null,
+                HttpCode = (int)HttpStatusCode.BadRequest,
+                ErrorMessage = "帳號或密碼不可為空"
+            });
+        }
+
+        if (!_users.CreateAccount(models))
+        {
+            return BadRequest(new RetrunJson
+            {
+                Data = null,
+                HttpCode = (int)HttpStatusCode.BadRequest,
+                ErrorMessage = _users.ErrorMessage
+            });
+        }
+
+        return Ok(new RetrunJson
+        {
+            Data = null,
+            HttpCode = (int)HttpStatusCode.OK,
+            ErrorMessage = null
+        });
+    }
     /// <summary>
     /// 處理 "NoLogin" 請求。
     /// </summary>

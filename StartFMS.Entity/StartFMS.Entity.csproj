@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StartFMS.EF\StartFMS.EF.csproj" />
+    <ProjectReference Include="..\StartFMS.Models\StartFMS.Models.csproj" />
   </ItemGroup>
 
 </Project>

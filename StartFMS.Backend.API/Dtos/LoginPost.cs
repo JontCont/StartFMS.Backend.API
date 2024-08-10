@@ -1,8 +1,6 @@
-﻿namespace StartFMS.Backend.API.Dtos
+﻿namespace StartFMS.Backend.API.Dtos;
+public class LoginPost
 {
-    public class LoginPost
-    {
-        public string Account { get; set; }
-        public string Password { get; set; }
-    }
+    public string Account { get; set; }
+    public string Password { get; set; }
 }
