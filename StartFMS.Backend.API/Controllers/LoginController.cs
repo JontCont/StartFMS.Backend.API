@@ -8,6 +8,7 @@ using StartFMS.Backend.API.Dtos;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
 using StartFMS.Entity;
+using StartFMS.Models;
 using System.Net;
 
 namespace StartFMS.Backend.API.Controllers;
@@ -81,26 +82,33 @@ public class LoginController : Controller
     }
 
     [HttpPost("SignUp")]
-    public IActionResult CreateUsers(LoginPost value)
+    public IActionResult CreateUsers(UserRegistration models)
     {
-        if (!_users.Login(value.Account, value.Password))
+        if (string.IsNullOrEmpty(models.Account) || string.IsNullOrEmpty(models.Password))
         {
-            var msg = _users.ErrorMessage;
-            return Unauthorized(new RetrunJson
+            return BadRequest(new RetrunJson
             {
                 Data = null,
-                HttpCode = (int)HttpStatusCode.Unauthorized,
-                ErrorMessage = msg
+                HttpCode = (int)HttpStatusCode.BadRequest,
+                ErrorMessage = "帳號或密碼不可為空"
             });
         }
 
-        var userName = _users.GetUserName();
-        var token = _users.GetAuthrizeToken();
-
-        return Ok(new
+        if (!_users.CreateAccount(models))
         {
-            UserName = userName,
-            Token = token
+            return BadRequest(new RetrunJson
+            {
+                Data = null,
+                HttpCode = (int)HttpStatusCode.BadRequest,
+                ErrorMessage = _users.ErrorMessage
+            });
+        }
+
+        return Ok(new RetrunJson
+        {
+            Data = null,
+            HttpCode = (int)HttpStatusCode.OK,
+            ErrorMessage = null
         });
     }
     /// <summary>

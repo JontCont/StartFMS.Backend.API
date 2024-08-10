@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using StartFMS.EF;
 using StartFMS.Extensions.Data;
+using StartFMS.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -38,7 +39,7 @@ namespace StartFMS.Entity
         /// <returns></returns>
         string? GetUserRole();
 
-        void CreateAccount();
+        bool CreateAccount(UserRegistration models);
     }
 
     public class Users : IUsers
@@ -117,7 +118,7 @@ namespace StartFMS.Entity
 
         public string? GetUserRole()
         {
-            return  _BackendContext.UserRoles
+            return _BackendContext.UserRoles
                 .FirstOrDefault(x => x.Id == this.userRoleId)?
                 .Name;
         }
@@ -185,11 +186,43 @@ namespace StartFMS.Entity
         }
 
 
-        public void CreateAccount()
+        public bool CreateAccount(UserRegistration models)
         {
-            UserAccount user = new UserAccount();//.InitValue
+            bool isFail = false;
+            if (string.IsNullOrEmpty(models.Account) || string.IsNullOrEmpty(models.Password))
+            {
+                SetErrorMessage("帳號或密碼不可為空");
+                return isFail;
+            }
+
+            if (_BackendContext.UserAccounts.Any(x => x.Account == models.Account))
+            {
+                SetErrorMessage("帳號已存在");
+                return isFail;
+            }
+
+            if (_BackendContext.UserAccounts.Any(x => x.Email == models.Email))
+            {
+                SetErrorMessage("信箱已存在");
+                return isFail;
+            }
+
+            if (!_BackendContext.UserRoles.Any(x => x.Name == "user"))
+            {
+                SetErrorMessage("身分無法成功建立，請聯絡管理員");
+                return isFail;
+            }
+
+            UserAccount user = new UserAccount().SetValue(models);
+            user.Id = Guid.NewGuid();
+            user.UserRoleId = _BackendContext.UserRoles
+                .Where(x => x.Name == "user")
+                .Select(x => x.Id)
+                .FirstOrDefault();
             _BackendContext.Add(user);
             _BackendContext.SaveChanges();
+
+            return !isFail;
         }
     }
 
