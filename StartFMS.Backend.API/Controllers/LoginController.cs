@@ -14,7 +14,7 @@ namespace StartFMS.Backend.API.Controllers;
 
 [AllowAnonymous]
 [ApiController]
-[Route("api/auth/Login/")]
+[Route("api/auth")]
 public class LoginController : Controller
 {
     private readonly ILogger<LoginController> _logger;
@@ -47,7 +47,7 @@ public class LoginController : Controller
     /// <param name="value">登入的 POST 資料。</param>
     /// <returns>包含登入結果的 JSON 回應。</returns>
     /// <remarks>包含登入結果的 JSON 回應。</remarks>
-    [HttpPost]
+    [HttpPost("Login")]
     public IActionResult jwtLogin(LoginPost value)
     {
         if (!_users.Login(value.Account, value.Password))
@@ -70,15 +70,39 @@ public class LoginController : Controller
             Token = token
         });
     }
+
     /// <summary>
     /// 處理登出請求。
     /// </summary>
-    [HttpDelete]
+    [HttpDelete("Login")]
     public void logout()
     {
         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
+    [HttpPost("SignUp")]
+    public IActionResult CreateUsers(LoginPost value)
+    {
+        if (!_users.Login(value.Account, value.Password))
+        {
+            var msg = _users.ErrorMessage;
+            return Unauthorized(new RetrunJson
+            {
+                Data = null,
+                HttpCode = (int)HttpStatusCode.Unauthorized,
+                ErrorMessage = msg
+            });
+        }
+
+        var userName = _users.GetUserName();
+        var token = _users.GetAuthrizeToken();
+
+        return Ok(new
+        {
+            UserName = userName,
+            Token = token
+        });
+    }
     /// <summary>
     /// 處理 "NoLogin" 請求。
     /// </summary>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using StartFMS.EF;
+using StartFMS.Extensions.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -37,6 +38,7 @@ namespace StartFMS.Entity
         /// <returns></returns>
         string? GetUserRole();
 
+        void CreateAccount();
     }
 
     public class Users : IUsers
@@ -152,12 +154,6 @@ namespace StartFMS.Entity
         }
 
 
-        /// <summary>
-        /// 從 BDP080 取得資料登入 
-        /// </summary>
-        /// <param name="userAutos">使用者驗證</param>
-        /// <param name="expireMinutes">時效</param>
-        /// <returns></returns>
         private string GenerateToken(List<Claim> claims, int expireMinutes = 30)
         {
             var userClaimsIdentity = new ClaimsIdentity(claims);
@@ -188,6 +184,13 @@ namespace StartFMS.Entity
             return serializeToken;
         }
 
+
+        public void CreateAccount()
+        {
+            UserAccount user = new UserAccount();//.InitValue
+            _BackendContext.Add(user);
+            _BackendContext.SaveChanges();
+        }
     }
 
 }
