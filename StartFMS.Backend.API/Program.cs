@@ -1,13 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
 using StartFMS.Backend.API.Extensions;
 using StartFMS.Backend.API.Filters;
 using StartFMS.Backend.Extensions;
 using StartFMS.EF;
 using StartFMS.Entity;
-using StartFMS.Extensions.Configuration;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -18,8 +15,6 @@ builder.Logging.ClearProviders().AddConsole();
 var config = builder.Configuration
     .AddJsonFile(path: $"appsettings.{builder.Environment.EnvironmentName}.json")
     .Build(); //加入設定檔
-
-var test = config.GetConnectionString("Develop");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -79,6 +74,7 @@ var audience = config.GetValue<string>("JwtSettings:Audience");
 builder.Services.AddScopedForInterface<IUsers, Users>(signing, issuer, audience);
 builder.Services.AddScopedForInterface<IUserRole, UserRoles>();
 builder.Services.AddScopedForInterface<ISystemManagement, SystemParameters>();
+
 
 
 
