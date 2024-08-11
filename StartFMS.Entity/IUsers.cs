@@ -137,7 +137,7 @@ namespace StartFMS.Entity
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, user.Account),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("FullName", user.Name),
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
             };
