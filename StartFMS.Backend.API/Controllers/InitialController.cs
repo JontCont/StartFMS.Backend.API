@@ -117,12 +117,12 @@ public class InitialController : Controller
         _context.SystemCatalogItems.Add(new SystemCatalogItem()
         {
             MenuName = "目錄設定",
-            Icon = "fa fa-cog",
+            Icon = "fa fa-bars",
             IsGroup = false,
             DisplayOrder = 2,
             ParentId = _context.SystemCatalogItems.FirstOrDefault(x => x.MenuName == "系統管理")!.Id,
             Url = "/system/meum-setting",
-            ImportAt = "System/SystemParameter/SystemParameter",
+            ImportAt = "Menu/MenuSetting",
         });
         _context.SaveChanges();
 
