@@ -51,4 +51,83 @@ public class InitialController : Controller
 
         return Ok("資料庫已存在");
     }
+
+    [HttpGet("Data")]
+    public IActionResult InitialUsersData()
+    {
+        _context.Database.BeginTransaction();
+        var userRoles = _context.UserRoles.ToList();
+        _context.RemoveRange(userRoles);
+
+        var userAccounts = _context.UserAccounts.ToList();
+        _context.RemoveRange(userAccounts);
+
+        var meuns = _context.SystemCatalogItems.ToList();
+        _context.RemoveRange(meuns);
+
+        // 檢查是否有資料
+        List<UserRole> userRolesList = new List<UserRole>(){
+                new UserRole
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Admin",
+                    Description = "管理員",
+                    IsEnabled = true,
+                },
+                new UserRole
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "User",
+                    Description = "使用者",
+                    IsEnabled = true,
+                }
+            };
+        _context.UserRoles.AddRange(userRolesList);
+        UserAccount userAccount = new UserAccount
+        {
+            Id = Guid.NewGuid(),
+            Account = "admin",
+            Password = "admin",
+            Name = "管理員",
+            Email = "admine@gmail.com",
+            UserRoleId = userRolesList.FirstOrDefault(x => x.Name == "Admin")!.Id,
+            IsEnabled = true,
+        };
+        _context.UserAccounts.Add(userAccount);
+
+        _context.SystemCatalogItems.Add(new SystemCatalogItem()
+        {
+            MenuName = "系統管理",
+            Icon = "fa fa-cogs",
+            IsGroup = true,
+            DisplayOrder = 1,
+        });
+        _context.SaveChanges();
+
+        _context.SystemCatalogItems.Add(new SystemCatalogItem()
+        {
+            MenuName = "參數管理",
+            Icon = "fa fa-cog",
+            IsGroup = false,
+            DisplayOrder = 1,
+            ParentId = _context.SystemCatalogItems.FirstOrDefault(x => x.MenuName == "系統管理")!.Id,
+            Url = "/system/parameter",
+            ImportAt = "System/SystemParameter/SystemParameter",
+        });
+        _context.SystemCatalogItems.Add(new SystemCatalogItem()
+        {
+            MenuName = "目錄設定",
+            Icon = "fa fa-cog",
+            IsGroup = false,
+            DisplayOrder = 2,
+            ParentId = _context.SystemCatalogItems.FirstOrDefault(x => x.MenuName == "系統管理")!.Id,
+            Url = "/system/meum-setting",
+            ImportAt = "System/SystemParameter/SystemParameter",
+        });
+        _context.SaveChanges();
+
+        _context.Database.CommitTransaction();
+        return Ok("執行成功");
+    }
+
 }
