@@ -207,7 +207,7 @@ namespace StartFMS.Entity
                 return isFail;
             }
 
-            if (!_BackendContext.UserRoles.Any(x => x.Name == "User"))
+            if (!_BackendContext.UserRoles.Any(x => x.Name == "user"))
             {
                 SetErrorMessage("身分無法成功建立，請聯絡管理員");
                 return isFail;
@@ -216,7 +216,7 @@ namespace StartFMS.Entity
             UserAccount user = new UserAccount().SetValue(models);
             user.Id = Guid.NewGuid();
             user.UserRoleId = _BackendContext.UserRoles
-                .Where(x => x.Name == "User")
+                .Where(x => x.Name == "user")
                 .Select(x => x.Id)
                 .FirstOrDefault();
             _BackendContext.Add(user);
