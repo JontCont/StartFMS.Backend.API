@@ -59,90 +59,81 @@ public class InitialController : Controller
         _context.Database.BeginTransaction();
         try
         {
-            var userRoles = _context.UserRoles.ToList();
-            _context.Entry(userRoles).State = EntityState.Detached;
-
-            var userAccounts = _context.UserAccounts.ToList();
-            _context.Entry(userAccounts).State = EntityState.Detached;
-
-            var systemItems = _context.SystemCatalogItems.ToList();
-            _context.Entry(systemItems).State = EntityState.Detached;
-
+            _context.UserAccounts.ExecuteDelete();
+            _context.UserRoles.ExecuteDelete();
+            _context.SystemCatalogItems.ExecuteDelete();
+            _context.SaveChanges();
             //取得 initdata 資料夾底下所有的 csv 檔案
             var csvFiles = Directory.GetFiles("initdata", "*.csv");
-
-            foreach (var csvFile in csvFiles)
+            if (csvFiles.Length <= 0)
             {
-                var fileName = Path.GetFileNameWithoutExtension(csvFile);
-                if (string.IsNullOrWhiteSpace(fileName)) continue; // 檔案名稱為空白時跳過
+                _context.Database.RollbackTransaction();
+                return Ok("執行成功 (沒有 initdata 資料)");
+            }
+            var csvFilesByName = csvFiles
+                .Select(x => new { Name = Path.GetFileNameWithoutExtension(x), Content = x })
+                .OrderBy(x => x.Name);
 
-                var csvData = System.IO.File.ReadAllText(csvFile);
+            foreach (var files in csvFilesByName)
+            {
+                if (string.IsNullOrWhiteSpace(files.Name)) continue; // 檔案名稱為空白時跳過
+
+                var csvData = System.IO.File.ReadAllText(files.Content);
                 var csvReader = new CsvReader(new StringReader(csvData), new CsvConfiguration(CultureInfo.InvariantCulture));
                 var records = csvReader.GetRecords<dynamic>().ToList();
 
-                switch (fileName.ToEnum<SystemNames>())
+                switch (files.Name.Split('_').LastOrDefault()!.ToEnum<SystemNames>())
                 {
-                    case SystemNames.UserRoles:
+                    case SystemNames.UserRole:
                         foreach (var record in records)
                         {
                             var userRole = new UserRole
                             {
-                                Id = record.Id,
+                                Id = Guid.TryParse(record.Id, out Guid format) ? format : throw new Exception("識別碼轉換失敗"),
                                 Name = record.Name,
                                 Description = record.Description,
-                                IsEnabled = record.IsEnabled,
+                                IsEnabled = record.IsEnabled == "1",
                             };
-                            _context.UserRoles.Add(userRole);
+                            _context.Entry(userRole).State = EntityState.Added;
                         }
-
-                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[UserRoles] ON");
-                        _context.Entry(userRoles).State = EntityState.Added;
                         _context.SaveChanges();
-                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[UserRoles] OFF");
-
                         break;
                     case SystemNames.UserAccounts:
                         foreach (var record in records)
                         {
                             var userAccount = new UserAccount
                             {
-                                Id = record.Id,
+                                Id = Guid.TryParse(record.Id, out Guid format) ? format : throw new Exception("識別碼轉換失敗"),
                                 Account = record.Account,
                                 Password = record.Password,
                                 Name = record.Name,
                                 Email = record.Email,
-                                UserRoleId = record.UserRoleId,
-                                IsEnabled = record.IsEnabled,
+                                UserRoleId = Guid.TryParse(record.UserRoleId, out Guid UserRoleId) ? UserRoleId : throw new Exception("UserRoleId 轉換失敗"),
+                                IsEnabled = record.IsEnabled == "1",
                             };
-                            _context.UserAccounts.Add(userAccount);
+                            _context.Entry(userAccount).State = EntityState.Added;
                         }
-
-                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[UserAccounts] ON");
-                        _context.Entry(userAccounts).State = EntityState.Added;
                         _context.SaveChanges();
-                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[UserAccounts] OFF");
 
                         break;
                     case SystemNames.SystemCatalogItems:
+                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SystemCatalogItems] ON");
                         foreach (var record in records)
                         {
                             var systemCatalogItem = new SystemCatalogItem
                             {
-                                Id = record.Id,
+                                Id = int.TryParse(record.Id, out int identityId) ? identityId : throw new Exception("識別碼轉換失敗"),
                                 MenuName = record.MenuName,
                                 Description = record.Description,
-                                DisplayOrder = record.DisplayOrder,
+                                DisplayOrder = int.TryParse(record.DisplayOrder, out int DisplayOrder) ? DisplayOrder : 0,
                                 Url = record.Url,
                                 Icon = record.Icon,
-                                ParentId = record.ParentId,
-                                IsGroup = record.IsGroup,
+                                ParentId = int.TryParse(record.ParentId, out int ParentId) ? ParentId : null,
+                                IsGroup = record.IsGroup == "1",
                                 ImportAt = record.ImportAt
                             };
-                            _context.SystemCatalogItems.Add(systemCatalogItem);
+                            _context.Entry(systemCatalogItem).State = EntityState.Added;
                         }
-
-                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SystemCatalogItems] ON");
-                        _context.Entry(systemItems).State = EntityState.Added;
                         _context.SaveChanges();
                         _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SystemCatalogItems] OFF");
 
