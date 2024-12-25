@@ -1,0 +1,4 @@
+﻿ID,MenuName,Description,DisplayOrder,Url,Icon,ParentId,IsGroup,ImportAt
+1,系統管理,,1,,fa fa-cogs,,1,
+2,參數管理,,1,/system/parameter,fa fa-cog,1,0,System/SystemParameter/SystemParameter
+3,目錄設定,,2,/system/meum-setting,fa fa-bars,1,0,Menu/MenuSetting

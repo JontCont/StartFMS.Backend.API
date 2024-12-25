@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StartFMS.Enums.Repository;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StartFMS.Enums.Extensions
 {
-    static class EnumsExtensions
+    public static class EnumsExtensions
     {
         /// <summary>
         /// 取得列舉的 DisplayAttribute.Name
@@ -142,6 +143,11 @@ namespace StartFMS.Enums.Extensions
             return enumValues!.Select(e => e.GetDisplayName() ?? throw new Exception("DisplayAttribute.Name is null"));
         }
 
-        
+
+        // 字串轉列舉
+        public static T ToEnum<T>(this string value)
+        {
+            return (T)Enum.Parse(typeof(T), value);
+        }
     }
 }
