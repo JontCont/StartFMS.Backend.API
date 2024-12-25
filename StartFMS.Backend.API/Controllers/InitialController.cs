@@ -1,11 +1,12 @@
 ﻿#pragma warning disable CS1591 // 遺漏公用可見類型或成員的 XML 註解
 
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StartFMS.Backend.Extensions;
-using StartFMS.EF;
-using StartFMS.Entity;
+using System.Globalization;
 
 namespace StartFMS.Backend.API.Controllers;
 
@@ -56,77 +57,96 @@ public class InitialController : Controller
     public IActionResult InitialUsersData()
     {
         _context.Database.BeginTransaction();
-        var userRoles = _context.UserRoles.ToList();
-        _context.RemoveRange(userRoles);
+        try
+        {
+            _context.UserAccounts.ExecuteDelete();
+            _context.UserRoles.ExecuteDelete();
+            _context.SystemCatalogItems.ExecuteDelete();
+            _context.SaveChanges();
+            //取得 initdata 資料夾底下所有的 csv 檔案
+            var csvFiles = Directory.GetFiles("initdata", "*.csv");
+            if (csvFiles.Length <= 0)
+            {
+                _context.Database.RollbackTransaction();
+                return Ok("執行成功 (沒有 initdata 資料)");
+            }
+            var csvFilesByName = csvFiles
+                .Select(x => new { Name = Path.GetFileNameWithoutExtension(x), Content = x })
+                .OrderBy(x => x.Name);
 
-        var userAccounts = _context.UserAccounts.ToList();
-        _context.RemoveRange(userAccounts);
+            foreach (var files in csvFilesByName)
+            {
+                if (string.IsNullOrWhiteSpace(files.Name)) continue; // 檔案名稱為空白時跳過
 
-        var meuns = _context.SystemCatalogItems.ToList();
-        _context.RemoveRange(meuns);
+                var csvData = System.IO.File.ReadAllText(files.Content);
+                var csvReader = new CsvReader(new StringReader(csvData), new CsvConfiguration(CultureInfo.InvariantCulture));
+                var records = csvReader.GetRecords<dynamic>().ToList();
 
-        // 檢查是否有資料
-        List<UserRole> userRolesList = new List<UserRole>(){
-                new UserRole
+                switch (files.Name.Split('_').LastOrDefault()!.ToEnum<SystemNames>())
                 {
-                    Id = Guid.NewGuid(),
-                    Name = "Admin",
-                    Description = "管理員",
-                    IsEnabled = true,
-                },
-                new UserRole
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "User",
-                    Description = "使用者",
-                    IsEnabled = true,
+                    case SystemNames.UserRole:
+                        foreach (var record in records)
+                        {
+                            var userRole = new UserRole
+                            {
+                                Id = Guid.TryParse(record.Id, out Guid format) ? format : throw new Exception("識別碼轉換失敗"),
+                                Name = record.Name,
+                                Description = record.Description,
+                                IsEnabled = record.IsEnabled == "1",
+                            };
+                            _context.Entry(userRole).State = EntityState.Added;
+                        }
+                        _context.SaveChanges();
+                        break;
+                    case SystemNames.UserAccounts:
+                        foreach (var record in records)
+                        {
+                            var userAccount = new UserAccount
+                            {
+                                Id = Guid.TryParse(record.Id, out Guid format) ? format : throw new Exception("識別碼轉換失敗"),
+                                Account = record.Account,
+                                Password = record.Password,
+                                Name = record.Name,
+                                Email = record.Email,
+                                UserRoleId = Guid.TryParse(record.UserRoleId, out Guid UserRoleId) ? UserRoleId : throw new Exception("UserRoleId 轉換失敗"),
+                                IsEnabled = record.IsEnabled == "1",
+                            };
+                            _context.Entry(userAccount).State = EntityState.Added;
+                        }
+                        _context.SaveChanges();
+
+                        break;
+                    case SystemNames.SystemCatalogItems:
+                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SystemCatalogItems] ON");
+                        foreach (var record in records)
+                        {
+                            var systemCatalogItem = new SystemCatalogItem
+                            {
+                                Id = int.TryParse(record.Id, out int identityId) ? identityId : throw new Exception("識別碼轉換失敗"),
+                                MenuName = record.MenuName,
+                                Description = record.Description,
+                                DisplayOrder = int.TryParse(record.DisplayOrder, out int DisplayOrder) ? DisplayOrder : 0,
+                                Url = record.Url,
+                                Icon = record.Icon,
+                                ParentId = int.TryParse(record.ParentId, out int ParentId) ? ParentId : null,
+                                IsGroup = record.IsGroup == "1",
+                                ImportAt = record.ImportAt
+                            };
+                            _context.Entry(systemCatalogItem).State = EntityState.Added;
+                        }
+                        _context.SaveChanges();
+                        _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SystemCatalogItems] OFF");
+
+                        break;
                 }
-            };
-        _context.UserRoles.AddRange(userRolesList);
-        UserAccount userAccount = new UserAccount
+            }
+            _context.Database.CommitTransaction();
+        }
+        catch (Exception ex)
         {
-            Id = Guid.NewGuid(),
-            Account = "admin",
-            Password = "admin",
-            Name = "管理員",
-            Email = "admine@gmail.com",
-            UserRoleId = userRolesList.FirstOrDefault(x => x.Name == "Admin")!.Id,
-            IsEnabled = true,
-        };
-        _context.UserAccounts.Add(userAccount);
-
-        _context.SystemCatalogItems.Add(new SystemCatalogItem()
-        {
-            MenuName = "系統管理",
-            Icon = "fa fa-cogs",
-            IsGroup = true,
-            DisplayOrder = 1,
-        });
-        _context.SaveChanges();
-
-        _context.SystemCatalogItems.Add(new SystemCatalogItem()
-        {
-            MenuName = "參數管理",
-            Icon = "fa fa-cog",
-            IsGroup = false,
-            DisplayOrder = 1,
-            ParentId = _context.SystemCatalogItems.FirstOrDefault(x => x.MenuName == "系統管理")!.Id,
-            Url = "/system/parameter",
-            ImportAt = "System/SystemParameter/SystemParameter",
-        });
-        _context.SystemCatalogItems.Add(new SystemCatalogItem()
-        {
-            MenuName = "目錄設定",
-            Icon = "fa fa-bars",
-            IsGroup = false,
-            DisplayOrder = 2,
-            ParentId = _context.SystemCatalogItems.FirstOrDefault(x => x.MenuName == "系統管理")!.Id,
-            Url = "/system/meum-setting",
-            ImportAt = "Menu/MenuSetting",
-        });
-        _context.SaveChanges();
-
-        _context.Database.CommitTransaction();
+            _context.Database.RollbackTransaction();
+            return BadRequest(ex.Message);
+        }
         return Ok("執行成功");
     }
 

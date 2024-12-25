@@ -20,11 +20,16 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
           include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: |
+          dotnet build --configuration Release ./StartFMS.Backend.API/StartFMS.Backend.API.csproj
+          dotnet build --configuration Release ./StartFMS.EF/StartFMS.EF.csproj
+          dotnet build --configuration Release ./StartFMS.Entity/StartFMS.Entity.csproj
+          dotnet build --configuration Release ./StartFMS.Enums/StartFMS.Enums.csproj
+          dotnet build --configuration Release ./StartFMS.Models/StartFMS.Models.csproj
         
       - name: Test with dotnet
-        run: dotnet test
+        run: dotnet test --no-build ./StartFMS.Backend.API/StartFMS.Backend.API.csproj
