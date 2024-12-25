@@ -28,8 +28,8 @@ jobs:
           dotnet build --configuration Release ./StartFMS.Backend.API/StartFMS.Backend.API.csproj
           dotnet build --configuration Release ./StartFMS.EF/StartFMS.EF.csproj
           dotnet build --configuration Release ./StartFMS.Entity/StartFMS.Entity.csproj
-          dotnet build --configuration Release ./StartFMS.Entity/StartFMS.Enums.csproj
-          dotnet build --configuration Release ./StartFMS.Entity/StartFMS.Models.csproj
+          dotnet build --configuration Release ./StartFMS.Enums/StartFMS.Enums.csproj
+          dotnet build --configuration Release ./StartFMS.Models/StartFMS.Models.csproj
         
       - name: Test with dotnet
         run: dotnet test --no-build ./StartFMS.Backend.API/StartFMS.Backend.API.csproj
