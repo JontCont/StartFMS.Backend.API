@@ -8,13 +8,26 @@ using StartFMS.Entity;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders().AddConsole();
+
+// builder.Logging.ClearProviders().AddConsole(); // Serilog 已接管 logging
 
 var config = builder.Configuration
     .AddJsonFile(path: $"appsettings.{builder.Environment.EnvironmentName}.json")
     .Build(); //加入設定檔
+
+// 設定 Serilog 並連接 Seq
+var seqUrl = config.GetValue<string>("Seq:Url") ?? "";
+var seqApiKey = config.GetValue<string>("Seq:ApiKey") ?? "";
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(seqUrl, apiKey: seqApiKey)
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -125,8 +138,9 @@ JwtHelpers jwtHelpers = new JwtHelpers()
     Audience = config.GetValue<string>("JwtSettings:Audience") ?? "",
 };
 builder.Services.AddSingleton(jwtHelpers);
-
 var app = builder.Build();
+
+app.UseMiddleware<TraceIdMiddleware>();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
