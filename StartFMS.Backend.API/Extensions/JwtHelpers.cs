@@ -132,9 +132,9 @@ public class JwtHelpers
     }
 
     /// <summary>
-    /// 從 BDP080 取得資料登入 
+    /// 從聲明清單產生 JWT Token
     /// </summary>
-    /// <param name="userAutos">使用者驗證</param>
+    /// <param name="claims">聲明清單</param>
     /// <param name="expireMinutes">時效</param>
     /// <returns></returns>
     public string GenerateToken(List<Claim> claims, int expireMinutes = 30)

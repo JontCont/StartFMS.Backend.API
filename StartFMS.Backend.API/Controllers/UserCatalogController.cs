@@ -23,9 +23,7 @@ public class UserCatalogController : Controller
     /// 初始化 <see cref="UserCatalogController"/> 類別的新執行個體。
     /// </summary>
     /// <param name="logger">日誌記錄器。</param>
-    /// <param name="users">使用者服務。</param>
     /// <param name="backendContext">後端內容。</param>
-    /// <param name="jwtHelpers">JWT 輔助工具。</param>
     public UserCatalogController(
         ILogger<UserCatalogController> logger,
         StartFmsBackendContext backendContext)
