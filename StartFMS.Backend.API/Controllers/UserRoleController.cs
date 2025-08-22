@@ -23,9 +23,8 @@ public class UserRoleController : Controller
     /// 初始化 <see cref="UserRoleController"/> 類別的新執行個體。
     /// </summary>
     /// <param name="logger">日誌記錄器。</param>
-    /// <param name="users">使用者服務。</param>
+    /// <param name="roles">使用者角色服務。</param>
     /// <param name="backendContext">後端內容。</param>
-    /// <param name="jwtHelpers">JWT 輔助工具。</param>
     public UserRoleController(
         ILogger<UserRoleController> logger,
         IUserRole roles,

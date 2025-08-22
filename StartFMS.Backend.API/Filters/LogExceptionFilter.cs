@@ -16,7 +16,7 @@ public class LogExceptionFilter : Attribute, IExceptionFilter
 
     public void OnException(ExceptionContext context)
     {
-        string rootRoot = _env.ContentRootPath + @"\Log\Error\";
+        string rootRoot = Path.Combine(_env.ContentRootPath, "Log", "Error");
         if (!Directory.Exists(rootRoot))
         {
             Directory.CreateDirectory(rootRoot);
@@ -29,7 +29,7 @@ public class LogExceptionFilter : Attribute, IExceptionFilter
             Exception = context.Exception.Message,
         };
         string text = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}] [Error] : {result } \n";
-        File.AppendAllText($"{rootRoot}ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt", text);
+        File.AppendAllText(Path.Combine(rootRoot, $"ParterApi_{DateTime.Now.ToString("yyyyMMdd")}.txt"), text);
 
         // Handle the exception here and create a custom error response
         context.Result = new ObjectResult(new RetrunJson

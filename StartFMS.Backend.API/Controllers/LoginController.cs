@@ -49,7 +49,7 @@ public class LoginController : Controller
     /// <returns>包含登入結果的 JSON 回應。</returns>
     /// <remarks>包含登入結果的 JSON 回應。</remarks>
     [HttpPost("Login")]
-    public IActionResult jwtLogin(LoginPost value)
+    public IActionResult JwtLogin(LoginPost value)
     {
         if (!_users.Login(value.Account, value.Password))
         {
@@ -76,7 +76,7 @@ public class LoginController : Controller
     /// 處理登出請求。
     /// </summary>
     [HttpDelete("Login")]
-    public void logout()
+    public void Logout()
     {
         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
@@ -116,7 +116,7 @@ public class LoginController : Controller
     /// </summary>
     /// <returns>回應訊息，指示使用者未登入。</returns>
     [HttpGet("NoLogin")]
-    public string noLogin()
+    public string NoLogin()
     {
         return "未登入";
     }
@@ -126,7 +126,7 @@ public class LoginController : Controller
     /// </summary>
     /// <returns>回應訊息，指示使用者無權限。</returns>
     [HttpGet("NoAccess")]
-    public string noAccess()
+    public string NoAccess()
     {
         return "沒有權限";
     }

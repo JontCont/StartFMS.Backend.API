@@ -18,8 +18,6 @@ namespace StartFMS.Backend.API.Controllers;
 public class SystemParametersController : Controller
 {
     private readonly ILogger<SystemParametersController> _logger;
-    private readonly StartFmsBackendContext _context;
-    private readonly JwtHelpers _jwtHelpers;
     private readonly ISystemManagement _systems;
 
     public SystemParametersController(
